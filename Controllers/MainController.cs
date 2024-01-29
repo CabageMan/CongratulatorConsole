@@ -9,18 +9,23 @@ public class MainController
 
     public MainController() 
     {
-        menuController = new MenuController();
+        menuController = new MenuController(ShowAllBirthdays, AddNewUser);
         congratulatorModel = new CongratulatorModel();
     }
 
     public void Start() 
     {
         menuController.Start();
-        // test
-        var date = DateOnly.FromDateTime(DateTime.Now);
-        congratulatorModel.AddNewUser(UserRole.Friend, "Blob", "Junior", date);
-        foreach(BirthdayUser user in congratulatorModel.BirthdayUsers) {
-            Console.WriteLine($"First person is: {user.ToString()}");
-        }
+    }
+
+    private void ShowAllBirthdays() 
+    {
+        MenuController.ShowAllBirthdays(congratulatorModel.BirthdayUsers);
+    }
+
+    private void AddNewUser(string firstName, string lastName, UserRole userRole, DateOnly birthDate) 
+    {
+        // Check if date is not future, only real facts
+        congratulatorModel.AddNewUser(userRole, firstName, lastName, birthDate);
     }
 }

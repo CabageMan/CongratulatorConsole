@@ -4,11 +4,14 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 namespace Controllers;
 
-public class MenuController 
+public class MenuController(
+    Action showBitrhdays,
+    Action<string, string, UserRole, DateOnly> addNewUser)
 {
     private const ConsoleColor TITLE_COLOR = ConsoleColor.Green;
     private const ConsoleColor ITEM_COLOR = ConsoleColor.Blue;
     private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
+    private const ConsoleColor WARNING_COLOR = ConsoleColor.Yellow;
 
     enum MainMenuItem 
     {
@@ -22,6 +25,9 @@ public class MenuController
 
     private bool exitApp = false;
 
+    private readonly Action _showBitrhdays = showBitrhdays;
+    private readonly Action<string, string, UserRole, DateOnly> _addNewUser = addNewUser;
+
     public void Start() 
     {
         Console.Clear();
@@ -29,6 +35,24 @@ public class MenuController
         {
             ShowMainMenu();
         }
+    }
+
+    public static void ShowAllBirthdays(List<BirthdayUser> birthdayUsers) 
+    {
+        if (birthdayUsers.Count != 0) {
+            DrawBirthdaysTable(birthdayUsers);
+        } else {
+            Console.ForegroundColor = WARNING_COLOR;
+            Console.WriteLine("There are no birthdays records yet", Console.ForegroundColor);
+            Console.ForegroundColor = ITEM_COLOR;
+        }
+
+        var userInput = "";
+        do {
+            Console.Write("Type \"x\" to back to the main menu\n> ");
+            userInput = Console.ReadLine();
+        } while(userInput != "x");
+        Console.Clear();
     }
 
     // Show menu 
@@ -49,7 +73,6 @@ public class MenuController
 
     private static void ShowTitle(string title)
     {
-        // Console.Clear();
         Console.ForegroundColor = TITLE_COLOR;
         Console.WriteLine(title + Environment.NewLine, Console.ForegroundColor);
     }
@@ -63,6 +86,44 @@ public class MenuController
             Console.WriteLine($"{Enum.GetName(typeof(E), enumItem)}");
         }
         Console.Write(Environment.NewLine);
+    }
+
+    private static void DrawBirthdaysTable(List<BirthdayUser> birthdayUsers) 
+    {
+        var titlesWithSpaces = new(string title, int space) [] { 
+            ("ID", 4), 
+            ("Role", 8), 
+            ("Name", 10), 
+            ("Birth Date", 10) 
+        };
+        DrawTableHeader(titlesWithSpaces);
+
+        foreach(BirthdayUser user in birthdayUsers) {
+            // Console.WriteLine(
+            //     $"{user.Id}{Tabs(4-user.Id.ToString().Length)} | " + 
+            //     $"{user.Role}{Tabs(8 - user.Role.ToString().Length)} | " +
+            //     $"{user.FullName}{Tabs(10 - user.FullName.Length)} | " +
+            //     $"{user.BirthDate:MM-dd-yyyy} | "
+            // );
+            Console.WriteLine(
+                $"{user.Id} | " + 
+                $"{user.Role} | " +
+                $"{user.FullName} | " +
+                $"{user.BirthDate:MM-dd-yyyy} |"
+            );
+        }
+    }
+
+    private static void DrawTableHeader((string, int)[] titlesWithSpaces) 
+    {
+        Console.ForegroundColor = WARNING_COLOR;
+        foreach((string title, int space) in titlesWithSpaces)
+        {
+            var whiteSpace = Tabs(space - title.Length);
+            Console.Write($"{title}{whiteSpace} | ");
+        }
+        Console.Write(Environment.NewLine);
+        Console.ForegroundColor = ITEM_COLOR;
     }
 
     // Get user input
@@ -96,7 +157,7 @@ public class MenuController
         switch (item) 
         {
             case MainMenuItem.ShowAll:
-                Console.WriteLine("Show all birthdays");
+                _showBitrhdays();
                 break;
             case MainMenuItem.ShowUpcoming:
                 Console.WriteLine("Show all upcoming birthdays");
@@ -117,7 +178,7 @@ public class MenuController
         }
     }
 
-    private static void HandleAddingNewUser(UserRole userRole) {
+    private void HandleAddingNewUser(UserRole userRole) {
         Console.Clear();
         Console.WriteLine($"Enter new {userRole} first name:{Environment.NewLine}");
         Console.Write("> ");
@@ -140,7 +201,29 @@ public class MenuController
             userBirthDateString = Console.ReadLine();
         }
 
-        // Temp
-        Console.WriteLine($"A new {userRole} {userFirstName} {userLastName} was born on {userBirthDate.ToString("MM-dd-yyyy")}");
+        _addNewUser(userFirstName ?? "", userLastName ?? "", userRole, userBirthDate);
+
+        Console.Clear();
     }
+
+    // Helpers
+    private static string Tabs(int n)
+    {
+        return new string('\t', n);
+    }
+
+    // private static int GetLargestLength(string[] strings)
+    // {
+    //     return new string('\t', n);
+    // }
+
+    // private static int GetCharCount(int number)
+    // {
+    //     return GetCharCount(number.ToString());
+    // }
+
+    // private static int GetCharCount(string text)
+    // {
+    //     return text.Length;
+    // }
 }

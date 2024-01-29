@@ -48,6 +48,7 @@ public struct BirthdayUser
     public BirthdayUser(int id, string firstName, string lastName, DateOnly birthDate, UserRole role)
     {
         _id = id;
+        _role = role;
         _birthDate = birthDate;
         _firstName = firstName;
         _lastName = lastName;
@@ -55,6 +56,6 @@ public struct BirthdayUser
 
     public override string ToString()
     {
-        return $"ID: {_id}; Role: {_role}; Name: {FullName}; Birth Date: {_birthDate:dddd}";
+        return $"ID: {_id}; Role: {Role}; Name: {FullName}; Birth Date: {_birthDate:MM-dd-yyyy}";
     }
 }
