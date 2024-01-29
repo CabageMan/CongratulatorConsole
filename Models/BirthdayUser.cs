@@ -3,9 +3,9 @@ namespace Models;
 public enum UserRole 
 {
     Friend = 1,
-    FamilarPerson = 2,
-    Colleague = 3,
-    Employee = 4
+    FamilarPerson,
+    Colleague,
+    Employee
 }
 
 public struct BirthdayUser

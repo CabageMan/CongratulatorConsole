@@ -1,6 +1,7 @@
 using Microsoft.VisualBasic;
 using Models;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 namespace Controllers;
 
 public class MenuController 
@@ -12,17 +13,18 @@ public class MenuController
     enum MainMenuItem 
     {
         ShowAll = 1,
-        ShowUpcoming = 2,
-        AddNew = 3,
-        Delete = 4,
-        Edit = 5, 
-        Exit = 6
+        ShowUpcoming,
+        AddNew,
+        Delete,
+        Edit, 
+        Exit
     }
 
     private bool exitApp = false;
 
     public void Start() 
     {
+        Console.Clear();
         while(!exitApp)
         {
             ShowMainMenu();
@@ -70,12 +72,14 @@ public class MenuController
         Console.Write("> ");
         var userInput = Console.ReadLine();
         var menuItemNumber = menuItemsCount;
-        
-        // Refactor to user bottom bound
-        while(!int.TryParse(userInput, out menuItemNumber) || menuItemNumber > menuItemsCount || menuItemNumber <= 0)
+
+        var allCases = (IEnumerable<int>)Enum.GetValues(typeof(E));
+        var minValue = allCases.ToArray().Min();
+
+        while(!int.TryParse(userInput, out menuItemNumber) || menuItemNumber > menuItemsCount || menuItemNumber < minValue)
         {
             Console.ForegroundColor = ERROR_COLOR;
-            Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between 1 and {menuItemsCount}", Console.ForegroundColor);            
+            Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between {minValue} and {menuItemsCount}", Console.ForegroundColor);            
             Console.ForegroundColor = ITEM_COLOR;
             Console.Write("> ");
             userInput = Console.ReadLine();
@@ -113,7 +117,7 @@ public class MenuController
         }
     }
 
-    private void HandleAddingNewUser(UserRole userRole) {
+    private static void HandleAddingNewUser(UserRole userRole) {
         Console.Clear();
         Console.WriteLine($"Enter new {userRole} first name:{Environment.NewLine}");
         Console.Write("> ");
