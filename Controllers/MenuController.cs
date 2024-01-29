@@ -88,6 +88,7 @@ public class MenuController(
         Console.Write(Environment.NewLine);
     }
 
+    // Improve drawing data! 
     private static void DrawBirthdaysTable(List<BirthdayUser> birthdayUsers) 
     {
         var titlesWithSpaces = new(string title, int space) [] { 
