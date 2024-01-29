@@ -2,10 +2,10 @@ namespace Models;
 
 public enum UserRole 
 {
-    Friend,
-    FamilarPerson,
-    Colleague,
-    Employee
+    Friend = 1,
+    FamilarPerson = 2,
+    Colleague = 3,
+    Employee = 4
 }
 
 public struct BirthdayUser

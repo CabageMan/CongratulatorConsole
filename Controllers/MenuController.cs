@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic;
+using Models;
 using System.ComponentModel;
 namespace Controllers;
 
@@ -8,7 +9,7 @@ public class MenuController
     private const ConsoleColor ITEM_COLOR = ConsoleColor.Blue;
     private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
 
-    enum MenuItem 
+    enum MainMenuItem 
     {
         ShowAll = 1,
         ShowUpcoming = 2,
@@ -22,74 +23,120 @@ public class MenuController
 
     public void Start() 
     {
-        Console.Clear();
-
         while(!exitApp)
         {
-            ShowMenu();
-            HandleSelectedItem(GetUsersMenuInput());
+            ShowMainMenu();
         }
     }
 
-    private static void ShowMenu() 
+    // Show menu 
+    private void ShowMainMenu() 
     {
-        // Show title:
-        Console.ForegroundColor = TITLE_COLOR;
-        Console.WriteLine($"Enter a number of menu item:{Environment.NewLine}", Console.ForegroundColor);
+        ShowTitle("Enter a number of menu item:");
+        ShowMenuItems<MainMenuItem>();
+        HandleSelectedMainMenuItem(GetUsersMenuItemInput<MainMenuItem>());
+    }
 
+    private void ShowAddUserMenu() 
+    {
+        Console.Clear();
+        ShowTitle("Select user role:");
+        ShowMenuItems<UserRole>();
+        HandleAddingNewUser(GetUsersMenuItemInput<UserRole>());
+    }
+
+    private static void ShowTitle(string title)
+    {
+        // Console.Clear();
+        Console.ForegroundColor = TITLE_COLOR;
+        Console.WriteLine(title + Environment.NewLine, Console.ForegroundColor);
+    }
+
+    private static void ShowMenuItems<E>() where E: Enum 
+    {
         Console.ForegroundColor = ITEM_COLOR;
-        foreach(int menuItem in Enum.GetValues(typeof(MenuItem))) 
+        foreach(int enumItem in Enum.GetValues(typeof(E))) 
         {
-            Console.Write($"\t{menuItem} - ");
-            Console.WriteLine($"{Enum.GetName(typeof(MenuItem), menuItem)}");
+            Console.Write($"\t{enumItem} - ");
+            Console.WriteLine($"{Enum.GetName(typeof(E), enumItem)}");
         }
         Console.Write(Environment.NewLine);
     }
 
-    private static MenuItem GetUsersMenuInput() 
+    // Get user input
+    private static E GetUsersMenuItemInput<E>() where E: Enum
     {
-        int menuItemsCount = Enum.GetValues(typeof(MenuItem)).Length;
+        int menuItemsCount = Enum.GetValues(typeof(E)).Length;
         Console.Write("> ");
         var userInput = Console.ReadLine();
         var menuItemNumber = menuItemsCount;
-
+        
+        // Refactor to user bottom bound
         while(!int.TryParse(userInput, out menuItemNumber) || menuItemNumber > menuItemsCount || menuItemNumber <= 0)
         {
             Console.ForegroundColor = ERROR_COLOR;
-            Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between ...", Console.ForegroundColor);            
+            Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between 1 and {menuItemsCount}", Console.ForegroundColor);            
             Console.ForegroundColor = ITEM_COLOR;
             Console.Write("> ");
             userInput = Console.ReadLine();
         }
 
-        return (MenuItem)Enum.ToObject(typeof(MenuItem), menuItemNumber);
+        return (E)Enum.ToObject(typeof(E), menuItemNumber);
     }
 
-    private void HandleSelectedItem(MenuItem item) 
+    // Handle User Input
+    private void HandleSelectedMainMenuItem(MainMenuItem item) 
     {
         Console.Clear();
 
         switch (item) 
         {
-            case MenuItem.ShowAll:
+            case MainMenuItem.ShowAll:
                 Console.WriteLine("Show all birthdays");
                 break;
-            case MenuItem.ShowUpcoming:
+            case MainMenuItem.ShowUpcoming:
                 Console.WriteLine("Show all upcoming birthdays");
                 break;
-            case MenuItem.AddNew:
-                Console.WriteLine("Add new birthday");
+            case MainMenuItem.AddNew:
+                ShowAddUserMenu();
                 break;
-            case MenuItem.Delete:
+            case MainMenuItem.Delete:
                 Console.WriteLine("Delete birthday");
                 break;
-            case MenuItem.Edit:
+            case MainMenuItem.Edit:
                 Console.WriteLine("Edit birthday");
                 break;
-            case MenuItem.Exit:
+            case MainMenuItem.Exit:
                 exitApp = true;
                 Console.WriteLine("Exiting the application...");
                 break;
         }
+    }
+
+    private void HandleAddingNewUser(UserRole userRole) {
+        Console.Clear();
+        Console.WriteLine($"Enter new {userRole} first name:{Environment.NewLine}");
+        Console.Write("> ");
+        var userFirstName = Console.ReadLine();
+
+        Console.WriteLine($"Enter {userFirstName}'s last name:{Environment.NewLine}");
+        Console.Write("> ");
+        var userLastName = Console.ReadLine();
+
+        Console.WriteLine($"Enter {userFirstName}'s {userLastName} bith date in format MM/dd/yyyy:{Environment.NewLine}");
+        Console.Write("> ");
+        var userBirthDateString = Console.ReadLine();
+
+        var userBirthDate = DateOnly.FromDateTime(DateTime.Now);
+        while(!DateOnly.TryParse(userBirthDateString, out userBirthDate)) {
+            Console.ForegroundColor = ERROR_COLOR;
+            Console.WriteLine($"Date input is incorrect {userBirthDateString}.{Environment.NewLine}Please enter correct date in format MM/dd/yyyy", Console.ForegroundColor);            
+            Console.ForegroundColor = ITEM_COLOR;
+            Console.Write("> ");
+            userBirthDateString = Console.ReadLine();
+        }
+
+        // Temp
+        Console.WriteLine($"A new {userRole} {userFirstName} {userLastName} was born on {userBirthDate.ToString("MM-dd-yyyy")}");
     }
 }
