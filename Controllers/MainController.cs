@@ -14,7 +14,9 @@ public class MainController
             ShowUpcommingBitrhdays,
             AddNewBirthday,
             ShowBirthdaysToDelete,
-            DeleteBirthday);
+            DeleteBirthday,
+            ShowBirthdaysToEdit,
+            EditBirthday);
         congratulatorModel = new CongratulatorModel();
     }
 
@@ -60,8 +62,18 @@ public class MainController
         menuController.ShowDeleteBirthdayMenu(congratulatorModel.BirthdayUsers);
     }
 
+    private void ShowBirthdaysToEdit() 
+    {
+        menuController.ShowEditBirthdayMenu(congratulatorModel.BirthdayUsers);
+    }
+
     private void DeleteBirthday(int Id) 
     {
-        congratulatorModel.DeletebirthdayBy(Id);
+        congratulatorModel.DeleteBirthdayBy(Id);
+    }
+
+    private void EditBirthday(BirthdayUser editedBirthdayUser) 
+    {
+        congratulatorModel.EditBirthday(editedBirthdayUser);
     }
 }

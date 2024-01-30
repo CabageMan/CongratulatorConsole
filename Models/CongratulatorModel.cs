@@ -21,7 +21,7 @@ public class CongratulatorModel
     }
 
     // Could throw an error if deletion is failed
-    public bool DeletebirthdayBy(int birthdayId)
+    public bool DeleteBirthdayBy(int birthdayId)
     {
         // Find index or element and if it exists remove from class.
         // var userToDeleteIndex = BirthdayUsers.FindIndex()
@@ -29,6 +29,17 @@ public class CongratulatorModel
 
         // }
         BirthdayUsers.RemoveAll(user => user.Id == birthdayId);
+        return true;
+    }
+
+    public bool EditBirthday(BirthdayUser editBirthdayUser)
+    {
+        // Find index or element and if it exists remove from class.
+        // var userToDeleteIndex = BirthdayUsers.FindIndex()
+        // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
+
+        // }
+
         return true;
     }
 }

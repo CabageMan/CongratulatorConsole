@@ -9,7 +9,9 @@ public class MenuController(
     Action showUpcommingBirthdays,
     Action<string, string, UserRole, DateOnly> addNewBirthday,
     Action showBirthdaysToDelete,
-    Action<int> deleteBirthday)
+    Action<int> deleteBirthday,
+    Action showBirthdaysToEdit,
+    Action<BirthdayUser> editBirthday)
 {
     private const ConsoleColor TITLE_COLOR = ConsoleColor.Green;
     private const ConsoleColor ITEM_COLOR = ConsoleColor.Blue;
@@ -33,6 +35,8 @@ public class MenuController(
     private readonly Action<string, string, UserRole, DateOnly> _addNewBirthday = addNewBirthday;
     private readonly Action _showBirthdaysToDelete = showBirthdaysToDelete;
     private readonly Action<int> _deleteBirthday = deleteBirthday;
+    private readonly Action _showBirthdaysToEdit = showBirthdaysToEdit;
+    private readonly Action<BirthdayUser> _editBirthday = editBirthday;
 
     public void Start() 
     {
@@ -100,6 +104,11 @@ public class MenuController(
         }
 
         Console.Clear();
+    }
+
+    public void ShowEditBirthdayMenu(List<BirthdayUser> birthdayUsers) 
+    {
+        // Combine this method with  ShowDeleteBirthdayMenu method
     }
 
     private static void ShowMenuTitle(string title)
@@ -214,7 +223,7 @@ public class MenuController(
                 _showBirthdaysToDelete();
                 break;
             case MainMenuItem.Edit:
-                Console.WriteLine("Edit birthday");
+                _showBirthdaysToEdit();
                 break;
             case MainMenuItem.Exit:
                 Console.WriteLine("Exiting the application...");
