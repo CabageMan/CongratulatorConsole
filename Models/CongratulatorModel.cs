@@ -15,7 +15,7 @@ public class CongratulatorModel
     public bool AddNewUser(UserRole role, string firstName, string lastName, DateOnly birthDate) 
     {
         // Add validations if names empty, role is wrong and birthday is in future in controller
-        int lastUserId = BirthdayUsers.Count == 0 ? 1 : BirthdayUsers.Last().Id;
+        int lastUserId = BirthdayUsers.Count == 0 ? 0 : BirthdayUsers.Last().Id;
         BirthdayUsers.Add(new(++lastUserId, firstName, lastName, birthDate, role));
         return true;
     }

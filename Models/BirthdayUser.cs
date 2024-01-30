@@ -8,13 +8,18 @@ public enum UserRole
     Employee
 }
 
-public struct BirthdayUser
+public struct BirthdayUser(
+    int id, 
+    string firstName, 
+    string lastName, 
+    DateOnly birthDate, 
+    UserRole role)
 {
-    private readonly int _id;
-    private DateOnly _birthDate;
-    private String _firstName;
-    private String _lastName;
-    private UserRole _role;
+    private readonly int _id = id;
+    private DateOnly _birthDate = birthDate;
+    private String _firstName = firstName;
+    private String _lastName = lastName;
+    private UserRole _role = role;
 
     public readonly int Id 
     {
@@ -24,6 +29,10 @@ public struct BirthdayUser
     { 
         get => _birthDate; 
         set => _birthDate = value; 
+    }
+    public readonly string BirthDateString 
+    { 
+        get => $"{_birthDate:MM-dd-yyyy}"; 
     }
     public string FirstName 
     { 
@@ -45,17 +54,8 @@ public struct BirthdayUser
         set => _role = value;
     }
 
-    public BirthdayUser(int id, string firstName, string lastName, DateOnly birthDate, UserRole role)
-    {
-        _id = id;
-        _role = role;
-        _birthDate = birthDate;
-        _firstName = firstName;
-        _lastName = lastName;
-    }
-
     public override string ToString()
     {
-        return $"ID: {_id}; Role: {Role}; Name: {FullName}; Birth Date: {_birthDate:MM-dd-yyyy}";
+        return $"ID: {_id}; Role: {Role}; Name: {FullName}; Birth Date: {BirthDateString}";
     }
 }

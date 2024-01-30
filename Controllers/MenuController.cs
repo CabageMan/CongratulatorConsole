@@ -58,7 +58,7 @@ public class MenuController(
     // Show menu 
     private void ShowMainMenu() 
     {
-        ShowTitle("Enter a number of menu item:");
+        ShowMenuTitle("Enter a number of menu item:");
         ShowMenuItems<MainMenuItem>();
         HandleSelectedMainMenuItem(GetUsersMenuItemInput<MainMenuItem>());
     }
@@ -66,12 +66,12 @@ public class MenuController(
     private void ShowAddUserMenu() 
     {
         Console.Clear();
-        ShowTitle("Select user role:");
+        ShowMenuTitle("Select user role:");
         ShowMenuItems<UserRole>();
         HandleAddingNewUser(GetUsersMenuItemInput<UserRole>());
     }
 
-    private static void ShowTitle(string title)
+    private static void ShowMenuTitle(string title)
     {
         Console.ForegroundColor = TITLE_COLOR;
         Console.WriteLine(title + Environment.NewLine, Console.ForegroundColor);
@@ -88,40 +88,40 @@ public class MenuController(
         Console.Write(Environment.NewLine);
     }
 
-    // Improve drawing data! 
     private static void DrawBirthdaysTable(List<BirthdayUser> birthdayUsers) 
     {
+        string spacer = " | ";
+        var spaceLength = spacer.Length;
+        var idColumnLength = birthdayUsers.Select(user => user.Id.ToString().Length).Max() + spaceLength;
+        var roleColumnLength = birthdayUsers.Select(user => user.Role.ToString().Length).Max() + spaceLength;
+        var nameColumnLength = birthdayUsers.Select(user => user.FullName.Length).Max() + spaceLength;
+        var birthDateColumnLength = birthdayUsers.Select(user => user.BirthDateString.Length).Max() + spaceLength;
+
         var titlesWithSpaces = new(string title, int space) [] { 
-            ("ID", 4), 
-            ("Role", 8), 
-            ("Name", 10), 
-            ("Birth Date", 10) 
+            ("ID", idColumnLength), 
+            ("Role", roleColumnLength), 
+            ("Name", nameColumnLength), 
+            ("Birth Date", birthDateColumnLength) 
         };
-        DrawTableHeader(titlesWithSpaces);
+        DrawTableHeader(titlesWithSpaces, spacer);
 
         foreach(BirthdayUser user in birthdayUsers) {
-            // Console.WriteLine(
-            //     $"{user.Id}{Tabs(4-user.Id.ToString().Length)} | " + 
-            //     $"{user.Role}{Tabs(8 - user.Role.ToString().Length)} | " +
-            //     $"{user.FullName}{Tabs(10 - user.FullName.Length)} | " +
-            //     $"{user.BirthDate:MM-dd-yyyy} | "
-            // );
             Console.WriteLine(
-                $"{user.Id} | " + 
-                $"{user.Role} | " +
-                $"{user.FullName} | " +
-                $"{user.BirthDate:MM-dd-yyyy} |"
+                $"{user.Id}{WhiteSpaces(idColumnLength - user.Id.ToString().Length)}{spacer}" + 
+                $"{user.Role}{WhiteSpaces(roleColumnLength - user.Role.ToString().Length)}{spacer}" +
+                $"{user.FullName}{WhiteSpaces(nameColumnLength - user.FullName.Length)}{spacer}" +
+                $"{user.BirthDateString}{WhiteSpaces(birthDateColumnLength - user.BirthDateString.Length)}{spacer}"
             );
         }
     }
 
-    private static void DrawTableHeader((string, int)[] titlesWithSpaces) 
+    private static void DrawTableHeader((string, int)[] titlesWithSpaces, string spacer) 
     {
         Console.ForegroundColor = WARNING_COLOR;
         foreach((string title, int space) in titlesWithSpaces)
         {
-            var whiteSpace = Tabs(space - title.Length);
-            Console.Write($"{title}{whiteSpace} | ");
+            var whiteSpace = WhiteSpaces(space - title.Length);
+            Console.Write($"{title}{whiteSpace}{spacer}");
         }
         Console.Write(Environment.NewLine);
         Console.ForegroundColor = ITEM_COLOR;
@@ -208,9 +208,9 @@ public class MenuController(
     }
 
     // Helpers
-    private static string Tabs(int n)
+    private static string WhiteSpaces(int count)
     {
-        return new string('\t', n);
+        return new string(' ', count);
     }
 
     // private static int GetLargestLength(string[] strings)
