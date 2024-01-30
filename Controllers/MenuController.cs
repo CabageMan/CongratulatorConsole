@@ -6,6 +6,7 @@ namespace Controllers;
 
 public class MenuController(
     Action showBitrhdays,
+    Action showUpcommingBitrhdays,
     Action<string, string, UserRole, DateOnly> addNewUser)
 {
     private const ConsoleColor TITLE_COLOR = ConsoleColor.Green;
@@ -26,6 +27,7 @@ public class MenuController(
     private bool exitApp = false;
 
     private readonly Action _showBitrhdays = showBitrhdays;
+    private readonly Action _showUpcommingBitrhdays = showUpcommingBitrhdays;
     private readonly Action<string, string, UserRole, DateOnly> _addNewUser = addNewUser;
 
     public void Start() 
@@ -37,7 +39,7 @@ public class MenuController(
         }
     }
 
-    public static void ShowAllBirthdays(List<BirthdayUser> birthdayUsers) 
+    public static void ShowBirthdays(List<BirthdayUser> birthdayUsers) 
     {
         if (birthdayUsers.Count != 0) {
             DrawBirthdaysTable(birthdayUsers);
@@ -161,7 +163,7 @@ public class MenuController(
                 _showBitrhdays();
                 break;
             case MainMenuItem.ShowUpcoming:
-                Console.WriteLine("Show all upcoming birthdays");
+                _showUpcommingBitrhdays();
                 break;
             case MainMenuItem.AddNew:
                 ShowAddUserMenu();
@@ -173,8 +175,8 @@ public class MenuController(
                 Console.WriteLine("Edit birthday");
                 break;
             case MainMenuItem.Exit:
-                exitApp = true;
                 Console.WriteLine("Exiting the application...");
+                exitApp = true;
                 break;
         }
     }
@@ -212,19 +214,4 @@ public class MenuController(
     {
         return new string(' ', count);
     }
-
-    // private static int GetLargestLength(string[] strings)
-    // {
-    //     return new string('\t', n);
-    // }
-
-    // private static int GetCharCount(int number)
-    // {
-    //     return GetCharCount(number.ToString());
-    // }
-
-    // private static int GetCharCount(string text)
-    // {
-    //     return text.Length;
-    // }
 }

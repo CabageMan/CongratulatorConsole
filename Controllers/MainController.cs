@@ -9,7 +9,10 @@ public class MainController
 
     public MainController() 
     {
-        menuController = new MenuController(ShowAllBirthdays, AddNewUser);
+        menuController = new MenuController(
+            ShowAllBirthdays,
+            ShowUpcommingBitrhdays,
+            AddNewUser);
         congratulatorModel = new CongratulatorModel();
     }
 
@@ -25,7 +28,25 @@ public class MainController
 
     private void ShowAllBirthdays() 
     {
-        MenuController.ShowAllBirthdays(congratulatorModel.BirthdayUsers);
+        MenuController.ShowBirthdays(congratulatorModel.BirthdayUsers);
+    }
+
+    private void ShowUpcommingBitrhdays() 
+    {
+        // Make two lists to show today birthdays at first, and then upcomming birthdays (up to 3 days).
+        var currentDate = DateOnly.FromDateTime(DateTime.Now);
+        var todayBirthdays = congratulatorModel.BirthdayUsers.Where(user => 
+            user.BirthDate.Month.Equals(currentDate.Month) && user.BirthDate.Day.Equals(currentDate.Day)
+        ).ToList();
+        var upcommingBirthdays = congratulatorModel.BirthdayUsers.Where(user => {
+            var lowBound = currentDate.DayNumber - user.BirthDate.DayNumber > 0; 
+            var upperBound = currentDate.DayNumber - user.BirthDate.DayNumber <= 3; 
+            Console.WriteLine($"Lower: {currentDate.DayNumber}\nUpper: {user.BirthDate.DayNumber}");
+            Console.ReadKey();
+            return lowBound && upperBound;
+        }).ToList();
+        todayBirthdays.AddRange(upcommingBirthdays);
+        MenuController.ShowBirthdays(todayBirthdays);
     }
 
     private void AddNewUser(string firstName, string lastName, UserRole userRole, DateOnly birthDate) 
