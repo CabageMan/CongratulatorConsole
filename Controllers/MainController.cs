@@ -12,23 +12,25 @@ public class MainController
         menuController = new MenuController(
             ShowAllBirthdays,
             ShowUpcommingBitrhdays,
-            AddNewUser);
+            AddNewBirthday,
+            ShowBirthdaysToDelete,
+            DeleteBirthday);
         congratulatorModel = new CongratulatorModel();
     }
 
     public void Start() 
     {
         // Mock data
-        congratulatorModel.AddNewUser(UserRole.FamilarPerson, "Blob", "Jr", DateOnly.FromDateTime(DateTime.Now));
-        congratulatorModel.AddNewUser(UserRole.Friend, "Blob", "Sr", DateOnly.FromDateTime(DateTime.Now));
-        congratulatorModel.AddNewUser(UserRole.FamilarPerson, "Greg", "Jhonson", DateOnly.FromDateTime(DateTime.Now));
+        congratulatorModel.AddNewBirthday(UserRole.FamilarPerson, "Blob", "Jr", DateOnly.FromDateTime(DateTime.Now));
+        congratulatorModel.AddNewBirthday(UserRole.Friend, "Blob", "Sr", DateOnly.FromDateTime(DateTime.Now));
+        congratulatorModel.AddNewBirthday(UserRole.FamilarPerson, "Greg", "Jhonson", DateOnly.FromDateTime(DateTime.Now));
 
         menuController.Start();
     }
 
     private void ShowAllBirthdays() 
     {
-        MenuController.ShowBirthdays(congratulatorModel.BirthdayUsers);
+        MenuController.ShowBirthdays(congratulatorModel.BirthdayUsers, "All birthdays list:");
     }
 
     private void ShowUpcommingBitrhdays() 
@@ -39,19 +41,27 @@ public class MainController
             user.BirthDate.Month.Equals(currentDate.Month) && user.BirthDate.Day.Equals(currentDate.Day)
         ).ToList();
         var upcommingBirthdays = congratulatorModel.BirthdayUsers.Where(user => {
-            var lowBound = user.BirthDate.DayOfYear - currentDate.DayOfYear > 0; 
-            var upperBound = user.BirthDate.DayOfYear - currentDate.DayOfYear <= 3; 
-            Console.WriteLine($"Lower: {user.BirthDate.DayOfYear}\nUpper: {currentDate.DayOfYear}\nResult: {lowBound} and {upperBound}");
-            Console.ReadKey();
-            return lowBound && upperBound;
+            var leftCondition = user.BirthDate.DayOfYear - currentDate.DayOfYear > 0; 
+            var rightCondition = user.BirthDate.DayOfYear - currentDate.DayOfYear <= 3; 
+            return leftCondition && rightCondition;
         }).ToList();
         todayBirthdays.AddRange(upcommingBirthdays);
-        MenuController.ShowBirthdays(todayBirthdays);
+        MenuController.ShowBirthdays(todayBirthdays, "Today and upcomming birthdays:");
     }
 
-    private void AddNewUser(string firstName, string lastName, UserRole userRole, DateOnly birthDate) 
+    private void AddNewBirthday(string firstName, string lastName, UserRole userRole, DateOnly birthDate) 
     {
-        // Check if date is not future, only real facts
-        congratulatorModel.AddNewUser(userRole, firstName, lastName, birthDate);
+        // ToDo: Check if date is not future, only real facts
+        congratulatorModel.AddNewBirthday(userRole, firstName, lastName, birthDate);
+    }
+
+    private void ShowBirthdaysToDelete() 
+    {
+        menuController.ShowDeleteBirthdayMenu(congratulatorModel.BirthdayUsers);
+    }
+
+    private void DeleteBirthday(int Id) 
+    {
+        congratulatorModel.DeletebirthdayBy(Id);
     }
 }

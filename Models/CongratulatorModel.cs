@@ -12,7 +12,7 @@ public class CongratulatorModel
     }
 
     // Could throw an error if validation or adding is failed
-    public bool AddNewUser(UserRole role, string firstName, string lastName, DateOnly birthDate) 
+    public bool AddNewBirthday(UserRole role, string firstName, string lastName, DateOnly birthDate) 
     {
         // Add validations if names empty, role is wrong and birthday is in future in controller
         int lastUserId = BirthdayUsers.Count == 0 ? 0 : BirthdayUsers.Last().Id;
@@ -21,13 +21,14 @@ public class CongratulatorModel
     }
 
     // Could throw an error if deletion is failed
-    public bool DeleteUser(int userId)
+    public bool DeletebirthdayBy(int birthdayId)
     {
         // Find index or element and if it exists remove from class.
         // var userToDeleteIndex = BirthdayUsers.FindIndex()
         // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
 
         // }
+        BirthdayUsers.RemoveAll(user => user.Id == birthdayId);
         return true;
     }
 }

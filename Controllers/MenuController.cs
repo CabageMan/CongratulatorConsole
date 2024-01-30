@@ -5,14 +5,16 @@ using System.ComponentModel.DataAnnotations;
 namespace Controllers;
 
 public class MenuController(
-    Action showBitrhdays,
-    Action showUpcommingBitrhdays,
-    Action<string, string, UserRole, DateOnly> addNewUser)
+    Action showBirthdays,
+    Action showUpcommingBirthdays,
+    Action<string, string, UserRole, DateOnly> addNewBirthday,
+    Action showBirthdaysToDelete,
+    Action<int> deleteBirthday)
 {
     private const ConsoleColor TITLE_COLOR = ConsoleColor.Green;
     private const ConsoleColor ITEM_COLOR = ConsoleColor.Blue;
     private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
-    private const ConsoleColor WARNING_COLOR = ConsoleColor.Yellow;
+    private const ConsoleColor WARNING_COLOR = ConsoleColor.Magenta;
 
     enum MainMenuItem 
     {
@@ -26,9 +28,11 @@ public class MenuController(
 
     private bool exitApp = false;
 
-    private readonly Action _showBitrhdays = showBitrhdays;
-    private readonly Action _showUpcommingBitrhdays = showUpcommingBitrhdays;
-    private readonly Action<string, string, UserRole, DateOnly> _addNewUser = addNewUser;
+    private readonly Action _showBirthdays = showBirthdays;
+    private readonly Action _showUpcommingBirthdays = showUpcommingBirthdays;
+    private readonly Action<string, string, UserRole, DateOnly> _addNewBirthday = addNewBirthday;
+    private readonly Action _showBirthdaysToDelete = showBirthdaysToDelete;
+    private readonly Action<int> _deleteBirthday = deleteBirthday;
 
     public void Start() 
     {
@@ -37,24 +41,6 @@ public class MenuController(
         {
             ShowMainMenu();
         }
-    }
-
-    public static void ShowBirthdays(List<BirthdayUser> birthdayUsers) 
-    {
-        if (birthdayUsers.Count != 0) {
-            DrawBirthdaysTable(birthdayUsers);
-        } else {
-            Console.ForegroundColor = WARNING_COLOR;
-            Console.WriteLine("There are no birthdays records yet", Console.ForegroundColor);
-            Console.ForegroundColor = ITEM_COLOR;
-        }
-
-        var userInput = "";
-        do {
-            Console.Write("Type \"x\" to back to the main menu\n> ");
-            userInput = Console.ReadLine();
-        } while(userInput != "x");
-        Console.Clear();
     }
 
     // Show menu 
@@ -73,6 +59,49 @@ public class MenuController(
         HandleAddingNewUser(GetUsersMenuItemInput<UserRole>());
     }
 
+    public static void ShowBirthdays(List<BirthdayUser> birthdayUsers, string title) 
+    {
+        ShowMenuTitle(title);
+        ShowBirthdaysList(birthdayUsers);
+
+        var userInput = "";
+        Console.ForegroundColor = TITLE_COLOR;
+        do {
+
+            Console.Write("Type \"x\" to return to the main menu\n> ");
+            userInput = Console.ReadLine();
+        } while(userInput != "x");
+        Console.Clear();
+    }
+
+    public void ShowDeleteBirthdayMenu(List<BirthdayUser> birthdayUsers) 
+    {
+        ShowMenuTitle("Enter birthday ID to delete: ");
+        ShowBirthdaysList(birthdayUsers);       
+
+        var birthdaysIdsList = birthdayUsers.Select(user => user.Id);
+        Console.ForegroundColor = TITLE_COLOR;
+        while(true) 
+        {
+            Console.Write("Enter birthday Id to delete or\ntype \"x\" to return to the main menu\n> ");
+            var userInput = Console.ReadLine();
+            if (userInput == "x")
+            {
+                break;
+            } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
+            {
+                _deleteBirthday(selectedId);
+                break;
+            } 
+            else 
+            {
+                continue;
+            }
+        }
+
+        Console.Clear();
+    }
+
     private static void ShowMenuTitle(string title)
     {
         Console.ForegroundColor = TITLE_COLOR;
@@ -88,6 +117,17 @@ public class MenuController(
             Console.WriteLine($"{Enum.GetName(typeof(E), enumItem)}");
         }
         Console.Write(Environment.NewLine);
+    }
+
+    private static void ShowBirthdaysList(List<BirthdayUser> birthdayUsers) 
+    {
+        if (birthdayUsers.Count != 0) {
+            DrawBirthdaysTable(birthdayUsers);
+        } else {
+            Console.ForegroundColor = WARNING_COLOR;
+            Console.WriteLine("There are no birthdays records yet", Console.ForegroundColor);
+            Console.ForegroundColor = ITEM_COLOR;
+        }
     }
 
     private static void DrawBirthdaysTable(List<BirthdayUser> birthdayUsers) 
@@ -115,6 +155,8 @@ public class MenuController(
                 $"{user.BirthDateString}{WhiteSpaces(birthDateColumnLength - user.BirthDateString.Length)}{spacer}"
             );
         }
+
+        Console.Write(Environment.NewLine);
     }
 
     private static void DrawTableHeader((string, int)[] titlesWithSpaces, string spacer) 
@@ -160,16 +202,16 @@ public class MenuController(
         switch (item) 
         {
             case MainMenuItem.ShowAll:
-                _showBitrhdays();
+                _showBirthdays();
                 break;
             case MainMenuItem.ShowUpcoming:
-                _showUpcommingBitrhdays();
+                _showUpcommingBirthdays();
                 break;
             case MainMenuItem.AddNew:
                 ShowAddUserMenu();
                 break;
             case MainMenuItem.Delete:
-                Console.WriteLine("Delete birthday");
+                _showBirthdaysToDelete();
                 break;
             case MainMenuItem.Edit:
                 Console.WriteLine("Edit birthday");
@@ -204,7 +246,7 @@ public class MenuController(
             userBirthDateString = Console.ReadLine();
         }
 
-        _addNewUser(userFirstName ?? "", userLastName ?? "", userRole, userBirthDate);
+        _addNewBirthday(userFirstName ?? "", userLastName ?? "", userRole, userBirthDate);
 
         Console.Clear();
     }
