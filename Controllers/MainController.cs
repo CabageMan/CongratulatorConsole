@@ -39,9 +39,9 @@ public class MainController
             user.BirthDate.Month.Equals(currentDate.Month) && user.BirthDate.Day.Equals(currentDate.Day)
         ).ToList();
         var upcommingBirthdays = congratulatorModel.BirthdayUsers.Where(user => {
-            var lowBound = currentDate.DayNumber - user.BirthDate.DayNumber > 0; 
-            var upperBound = currentDate.DayNumber - user.BirthDate.DayNumber <= 3; 
-            Console.WriteLine($"Lower: {currentDate.DayNumber}\nUpper: {user.BirthDate.DayNumber}");
+            var lowBound = user.BirthDate.DayOfYear - currentDate.DayOfYear > 0; 
+            var upperBound = user.BirthDate.DayOfYear - currentDate.DayOfYear <= 3; 
+            Console.WriteLine($"Lower: {user.BirthDate.DayOfYear}\nUpper: {currentDate.DayOfYear}\nResult: {lowBound} and {upperBound}");
             Console.ReadKey();
             return lowBound && upperBound;
         }).ToList();
