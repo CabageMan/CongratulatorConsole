@@ -2,6 +2,7 @@ using Microsoft.VisualBasic;
 using Models;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Common;
 namespace Controllers;
 
 public class MenuController(
@@ -202,7 +203,8 @@ public class MenuController(
     {
         var userInput = "";
         Console.ForegroundColor = TITLE_COLOR;
-        do {
+        do 
+        {
 
             Console.Write("Type \"x\" to return to the main menu\n> ");
             userInput = Console.ReadLine();
@@ -213,7 +215,7 @@ public class MenuController(
     private void GetDeleteBirthdayUserInput(IEnumerable<int> birthdaysIdsList) 
     {
         Console.ForegroundColor = TITLE_COLOR;
-        while(true) 
+        while (true) 
         {
             Console.Write("Enter birthday Id to delete or\ntype \"x\" to return to the main menu\n> ");
             var userInput = Console.ReadLine();
@@ -222,7 +224,19 @@ public class MenuController(
                 break;
             } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
             {
-                _deleteBirthday(selectedId);
+                while (true) 
+                {
+                    Console.Write("Are you shure? yes/no\n> ");
+                    var confirmInput = Console.ReadLine();
+                    if (confirmInput == "y" || confirmInput == "yes")
+                    {
+                        _deleteBirthday(selectedId);
+                        break;
+                    } else if (confirmInput == "n" || confirmInput == "no")
+                    {
+                        break;
+                    }
+                }
                 break;
             } 
             else 
@@ -236,6 +250,39 @@ public class MenuController(
     private void GetEditBirthdayUserInput(List<BirthdayUser> birthdayUsers)
     {
         Console.ForegroundColor = TITLE_COLOR;
+        while(true) 
+        {
+            Console.Write("Enter birthday Id you want to edit or\ntype \"x\" to return to the main menu\n> ");
+            var userInput = Console.ReadLine();
+            var birthdaysIdsList = birthdayUsers.Select(user => user.Id);
+            if (userInput == "x")
+            {
+                break;
+            } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
+            {
+                HandleEditingBirthday(birthdayUsers, selectedId);
+                break;
+            } 
+            else 
+            {
+                continue;
+            }
+        }
+        Console.Clear();
+    }
+
+    private static DateOnly GetUserDateInput() 
+    {
+        var inputBirthDateString = Console.ReadLine();
+        var inputBirthDate = DateOnly.FromDateTime(DateTime.Now);
+        while(!DateOnly.TryParse(inputBirthDateString, out inputBirthDate)) {
+            Console.ForegroundColor = ERROR_COLOR;
+            Console.WriteLine($"Date input is incorrect {inputBirthDateString}.{Environment.NewLine}Please enter correct date in format MM/dd/yyyy", Console.ForegroundColor);            
+            Console.ForegroundColor = ITEM_COLOR;
+            Console.Write("> ");
+            inputBirthDateString = Console.ReadLine();
+        }
+        return inputBirthDate;
     }
 
     // Handle User Input
@@ -279,18 +326,41 @@ public class MenuController(
 
         Console.WriteLine($"Enter {userFirstName}'s {userLastName} bith date in format MM/dd/yyyy:{Environment.NewLine}");
         Console.Write("> ");
-        var userBirthDateString = Console.ReadLine();
-
-        var userBirthDate = DateOnly.FromDateTime(DateTime.Now);
-        while(!DateOnly.TryParse(userBirthDateString, out userBirthDate)) {
-            Console.ForegroundColor = ERROR_COLOR;
-            Console.WriteLine($"Date input is incorrect {userBirthDateString}.{Environment.NewLine}Please enter correct date in format MM/dd/yyyy", Console.ForegroundColor);            
-            Console.ForegroundColor = ITEM_COLOR;
-            Console.Write("> ");
-            userBirthDateString = Console.ReadLine();
-        }
+        var userBirthDate = GetUserDateInput();
 
         _addNewBirthday(userFirstName ?? "", userLastName ?? "", userRole, userBirthDate);
+
+        Console.Clear();
+    }
+
+    private void HandleEditingBirthday(List<BirthdayUser> birthdayUsers, int selectedId)
+    {
+        var selectedUser = birthdayUsers.Find(user => user.Id == selectedId);
+        Console.Clear();
+        ShowMenuTitle($"Current Role is {selectedUser.Role} enter new one:");
+        ShowMenuItems<UserRole>();
+        var updateRole = GetUsersMenuItemInput<UserRole>();
+
+        Console.Clear();
+        Console.WriteLine($"Current First Name is {selectedUser.FirstName} enter new one:{Environment.NewLine}");
+        Console.Write("> ");
+        var updatedFirstName = Console.ReadLine() ?? "";
+
+        Console.WriteLine($"Current Last Name is {selectedUser.LastName} ented new one:{Environment.NewLine}");
+        Console.Write("> ");
+        var updatedLastName = Console.ReadLine() ?? "";
+
+        Console.WriteLine($"Current Birth Date is {selectedUser.BirthDateString} enter new one in format MM/dd/yyyy:{Environment.NewLine}");
+        Console.Write("> ");
+        var updatedBirthDate = GetUserDateInput();
+
+        _editBirthday(new BirthdayUser(
+            selectedId,
+            updatedFirstName,
+            updatedLastName, 
+            updatedBirthDate, 
+            updateRole)
+            );
 
         Console.Clear();
     }

@@ -32,13 +32,14 @@ public class CongratulatorModel
         return true;
     }
 
-    public bool EditBirthday(BirthdayUser editBirthdayUser)
+    public bool EditBirthday(BirthdayUser editedBirthdayUser)
     {
         // Find index or element and if it exists remove from class.
         // var userToDeleteIndex = BirthdayUsers.FindIndex()
         // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
 
         // }
+        Console.WriteLine($"User Updated: {editedBirthdayUser.ToString()}");
 
         return true;
     }
