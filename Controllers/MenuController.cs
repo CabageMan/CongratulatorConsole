@@ -28,6 +28,14 @@ public class MenuController(
         Exit
     }
 
+    public enum BirthdaysListMenuItem
+    {
+        ShowAll,
+        ShowUpcomming,
+        Edit,
+        Delete
+    }
+
     private bool exitApp = false;
 
     private readonly Action _showBirthdays = showBirthdays;
@@ -47,7 +55,7 @@ public class MenuController(
         }
     }
 
-    // Show menu 
+    // Show menus 
     private void ShowMainMenu() 
     {
         ShowMenuTitle("Enter a number of menu item:");
@@ -63,54 +71,36 @@ public class MenuController(
         HandleAddingNewUser(GetUsersMenuItemInput<UserRole>());
     }
 
-    public static void ShowBirthdays(List<BirthdayUser> birthdayUsers, string title) 
+    public void ShowBirthdaysListWithAction(
+        List<BirthdayUser> birthdayUsers, 
+        BirthdaysListMenuItem action)
     {
-        ShowMenuTitle(title);
-        ShowBirthdaysList(birthdayUsers);
-
-        var userInput = "";
-        Console.ForegroundColor = TITLE_COLOR;
-        do {
-
-            Console.Write("Type \"x\" to return to the main menu\n> ");
-            userInput = Console.ReadLine();
-        } while(userInput != "x");
-        Console.Clear();
-    }
-
-    public void ShowDeleteBirthdayMenu(List<BirthdayUser> birthdayUsers) 
-    {
-        ShowMenuTitle("Enter birthday ID to delete: ");
-        ShowBirthdaysList(birthdayUsers);       
-
-        var birthdaysIdsList = birthdayUsers.Select(user => user.Id);
-        Console.ForegroundColor = TITLE_COLOR;
-        while(true) 
+        switch (action)
         {
-            Console.Write("Enter birthday Id to delete or\ntype \"x\" to return to the main menu\n> ");
-            var userInput = Console.ReadLine();
-            if (userInput == "x")
-            {
+            case BirthdaysListMenuItem.ShowAll:
+                ShowMenuTitle("All birthdays list:");
+                ShowBirthdaysList(birthdayUsers);
+                GetOnlyExitUserInput();
                 break;
-            } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
-            {
-                _deleteBirthday(selectedId);
+            case BirthdaysListMenuItem.ShowUpcomming:
+                ShowMenuTitle("Today and upcomming birthdays:");
+                ShowBirthdaysList(birthdayUsers);
+                GetOnlyExitUserInput();
                 break;
-            } 
-            else 
-            {
-                continue;
-            }
+            case BirthdaysListMenuItem.Delete:
+                ShowMenuTitle("Enter birthday ID to delete: ");
+                ShowBirthdaysList(birthdayUsers);       
+                GetDeleteBirthdayUserInput(birthdayUsers.Select(user => user.Id));
+                break;
+            case BirthdaysListMenuItem.Edit:
+                ShowMenuTitle("Enter birthday ID to edit: ");
+                ShowBirthdaysList(birthdayUsers);       
+                GetEditBirthdayUserInput(birthdayUsers);
+                break;
         }
-
-        Console.Clear();
     }
 
-    public void ShowEditBirthdayMenu(List<BirthdayUser> birthdayUsers) 
-    {
-        // Combine this method with  ShowDeleteBirthdayMenu method
-    }
-
+    // Draw content in console
     private static void ShowMenuTitle(string title)
     {
         Console.ForegroundColor = TITLE_COLOR;
@@ -180,6 +170,11 @@ public class MenuController(
         Console.ForegroundColor = ITEM_COLOR;
     }
 
+    private static string WhiteSpaces(int count)
+    {
+        return new string(' ', count);
+    }
+
     // Get user input
     private static E GetUsersMenuItemInput<E>() where E: Enum
     {
@@ -201,6 +196,46 @@ public class MenuController(
         }
 
         return (E)Enum.ToObject(typeof(E), menuItemNumber);
+    }
+
+    private static void GetOnlyExitUserInput() 
+    {
+        var userInput = "";
+        Console.ForegroundColor = TITLE_COLOR;
+        do {
+
+            Console.Write("Type \"x\" to return to the main menu\n> ");
+            userInput = Console.ReadLine();
+        } while(userInput != "x");
+        Console.Clear();
+    }
+
+    private void GetDeleteBirthdayUserInput(IEnumerable<int> birthdaysIdsList) 
+    {
+        Console.ForegroundColor = TITLE_COLOR;
+        while(true) 
+        {
+            Console.Write("Enter birthday Id to delete or\ntype \"x\" to return to the main menu\n> ");
+            var userInput = Console.ReadLine();
+            if (userInput == "x")
+            {
+                break;
+            } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
+            {
+                _deleteBirthday(selectedId);
+                break;
+            } 
+            else 
+            {
+                continue;
+            }
+        }
+        Console.Clear();
+    }
+
+    private void GetEditBirthdayUserInput(List<BirthdayUser> birthdayUsers)
+    {
+        Console.ForegroundColor = TITLE_COLOR;
     }
 
     // Handle User Input
@@ -258,11 +293,5 @@ public class MenuController(
         _addNewBirthday(userFirstName ?? "", userLastName ?? "", userRole, userBirthDate);
 
         Console.Clear();
-    }
-
-    // Helpers
-    private static string WhiteSpaces(int count)
-    {
-        return new string(' ', count);
     }
 }
