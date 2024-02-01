@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<Root>
+    <BirthdayUser>
+        <Id>1</Id>
+        <Role>FamilarPerson</Role>
+        <FirstName>Blob</FirstName>
+        <LastName>Jr</LastName>
+        <BirthDate>02.03.2004</BirthDate>
+    </BirthdayUser>
+ 
+    <BirthdayUser>
+        <Id>2</Id>
+        <Role>Friend</Role>
+        <FirstName>Blob</FirstName>
+        <LastName>Sr</LastName>
+        <BirthDate>09.21.1973</BirthDate>
+    </BirthdayUser>
+
+    <BirthdayUser>
+        <Id>3</Id>
+        <Role>Colleague</Role>
+        <FirstName>Greg</FirstName>
+        <LastName>Jhonson</LastName>
+        <BirthDate>10.15.1988</BirthDate>
+    </BirthdayUser>
+</Root>

@@ -3,6 +3,7 @@ using Models;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Data.Common;
+
 namespace Controllers;
 
 public class MenuController(
@@ -187,7 +188,7 @@ public class MenuController(
         var allCases = (IEnumerable<int>)Enum.GetValues(typeof(E));
         var minValue = allCases.ToArray().Min();
 
-        while(!int.TryParse(userInput, out menuItemNumber) || menuItemNumber > menuItemsCount || menuItemNumber < minValue)
+        while(!int.TryParse(userInput, out menuItemNumber) || !Enum.IsDefined(typeof(E), menuItemNumber))
         {
             Console.ForegroundColor = ERROR_COLOR;
             Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between {minValue} and {menuItemsCount}", Console.ForegroundColor);            

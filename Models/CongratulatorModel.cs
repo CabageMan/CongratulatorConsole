@@ -1,14 +1,16 @@
 using System.Runtime.Serialization;
+using Datasource;
 
 namespace Models;
 
 public class CongratulatorModel 
 {
+    private IDatasource datasource;
     public List<BirthdayUser> BirthdayUsers { get; set; }
 
     public CongratulatorModel() {
-        // Init here a data manager (files or data base)
-        BirthdayUsers = [];
+        datasource = new FileDatasource();
+        BirthdayUsers = ConvertFromRawBirthdays(datasource.GetAllBirthdayUsers());
     }
 
     // Could throw an error if validation or adding is failed
@@ -42,5 +44,37 @@ public class CongratulatorModel
         Console.WriteLine($"User Updated: {editedBirthdayUser.ToString()}");
 
         return true;
+    }
+
+    private static List<BirthdayUser> ConvertFromRawBirthdays(List<RawBirthday> rawBirthdays)
+    {
+        List<BirthdayUser> birthdayUsers = [];
+        foreach (RawBirthday rawBirthday in rawBirthdays) {
+            if (
+                Enum.TryParse(rawBirthday.RoleString, true, out UserRole role) &&
+                DateOnly.TryParse(rawBirthday.BirthDateString, out DateOnly birthDate))
+            {
+                birthdayUsers.Add(new(
+                    rawBirthday.Id,
+                    rawBirthday.FirstName,
+                    rawBirthday.LastName,
+                    birthDate,
+                    role)
+                );
+            }
+            else
+            {
+                throw new Exception();
+            }
+        }
+        return birthdayUsers;
+
+        /*
+        return rawBirthdays.Select(rawBirthday => {
+            Enum.TryParse(rawBirthday.RoleString, out UserRole userRole);
+            DateOnly.TryParse(rawBirthday.BirthDateString, out DateOnly birthDate);
+            return new BirthdayUser(rawBirthday.Id, rawBirthday.FirstName, rawBirthday.LastName, birthDate, userRole);
+        }).ToList();
+        */
     }
 }
