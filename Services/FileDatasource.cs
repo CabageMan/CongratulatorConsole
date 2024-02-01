@@ -1,5 +1,3 @@
-
-
 using System.Xml;
 using Datasource;
 using Microsoft.VisualBasic;
@@ -10,7 +8,7 @@ public class FileDatasource: IDatasource
 {
     // TODO: Move file path to config file and environment variable
     private const string FILE_PATH = "Resources/Birthdays.xml";
-    private XmlDocument document;
+    private readonly XmlDocument document;
     public FileDatasource() 
     {
         document = new();
@@ -19,6 +17,22 @@ public class FileDatasource: IDatasource
 
     List<RawBirthday> IDatasource.GetAllBirthdayUsers() {
         return ParseXmlBirthdays(document.DocumentElement);
+    }
+
+    bool IDatasource.PutAllBirthdayUsers(List<Datasource.RawBirthday> rawBirthdays)
+    {
+        // TODO: Handle all exceptions on writing.
+        document.RemoveAll();
+        var xtw = new XmlTextWriter(FILE_PATH, System.Text.Encoding.UTF8);
+        xtw.Formatting = Formatting.Indented;
+        document.WriteContentTo(xtw);
+
+        // Make changes to the document.
+// using(XmlTextWriter xtw = new XmlTextWriter("path_to_output_file", Encoding.UTF8)) {
+//   xtw.Formatting = Formatting.Indented; // optional, if you want it to look nice
+//   doc.WriteContentTo(xtw);
+// }
+        return true;
     }
 
     // TODO: Refactor parsing

@@ -50,5 +50,6 @@ public struct RawBirthday(
 public interface IDatasource
 {
     List<RawBirthday> GetAllBirthdayUsers();
+    bool PutAllBirthdayUsers(List<RawBirthday> rawBirthdays);
 }
 

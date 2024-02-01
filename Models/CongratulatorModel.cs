@@ -30,6 +30,7 @@ public class CongratulatorModel
         // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
 
         // }
+        datasource.PutAllBirthdayUsers([]);
         BirthdayUsers.RemoveAll(user => user.Id == birthdayId);
         return true;
     }

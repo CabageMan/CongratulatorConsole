@@ -22,11 +22,6 @@ public class MainController
 
     public void Start() 
     {
-        // Mock data
-        congratulatorModel.AddNewBirthday(UserRole.FamilarPerson, "Blob", "Jr", DateOnly.FromDateTime(DateTime.Now));
-        congratulatorModel.AddNewBirthday(UserRole.Friend, "Blob", "Sr", DateOnly.FromDateTime(DateTime.Now));
-        congratulatorModel.AddNewBirthday(UserRole.FamilarPerson, "Greg", "Jhonson", DateOnly.FromDateTime(DateTime.Now));
-
         menuController.Start();
     }
 
