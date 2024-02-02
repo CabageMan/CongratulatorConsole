@@ -18,22 +18,19 @@ public class FileDatasource : IDatasource
     private const string BIRTHDATE_NODE_NAME = "BirthDate";
 
 
-    private readonly XmlDocument document;
+    private readonly XDocument document;
 
     public FileDatasource()
     {
-        document = new();
-        document.Load(FILE_PATH);
+        document = XDocument.Load(FILE_PATH);
     }
 
     List<RawBirthday> IDatasource.GetAllBirthdays()
     {
-        var xml = XDocument.Load(FILE_PATH);
-
         IEnumerable<RawBirthday> birstdays = [];
-        if (xml.Root != null)
+        if (document.Root != null)
         {
-            birstdays = xml.Root
+            birstdays = document.Root
                 .Descendants(BIRTHDAY_RECORD_NODE_NAME)
                 .Select(record => ParseBirthdayRecord(record));
         }
@@ -45,20 +42,56 @@ public class FileDatasource : IDatasource
         return birstdays.ToList();
     }
 
-    void IDatasource.PutAllBirthdays(List<RawBirthday> rawBirthdays)
-    {
-        // TODO: Handle all exceptions on writing.
-        // document.RemoveAll();
-        // document.WriteContentTo(xmlTextWriter);
-    }
-
     void IDatasource.AddNewBirthday(RawBirthday rawBirthday)
     {
-        var xml = XDocument.Load(FILE_PATH);
-        var recordToAdd = ConvertToXmlBirthdayRecord(rawBirthday);
-        Console.WriteLine("Record to Add" + recordToAdd.ToString());
-        xml.Root.Add(recordToAdd);
-        xml.Save(FILE_PATH);
+        if (document.Root != null)
+        {
+            var recordToAdd = ConvertToXmlBirthdayRecord(rawBirthday);
+            document.Root.Add(recordToAdd);
+            document.Save(FILE_PATH);
+        }
+        else
+        {
+            throw new InvalidOperationException("Root Element is null");
+        }
+    }
+
+    void IDatasource.DeleteBirthdayBy(int birthdayId)
+    {
+        if (document.Root != null)
+        {
+            var birthdayToDelete = document.Root
+                .Descendants(BIRTHDAY_RECORD_NODE_NAME)
+                .First(record => {
+                    var idNode = record.Element(ID_NODE_NAME);
+                    return idNode != null ? int.Parse(idNode.Value) == birthdayId : false;
+                });
+            birthdayToDelete.Remove();
+            document.Save(FILE_PATH);
+        }
+        else 
+        {
+            throw new InvalidOperationException("Root Element is null");
+        }
+    }
+
+    void IDatasource.ReplaceBirthday(Datasource.RawBirthday rawBirthday)
+    {
+        if (document.Root != null)
+        {
+            var birthdayToDelete = document.Root
+                .Descendants(BIRTHDAY_RECORD_NODE_NAME)
+                .First(record => {
+                    var idNode = record.Element(ID_NODE_NAME);
+                    return idNode != null ? int.Parse(idNode.Value) == rawBirthday.Id : false;
+                });
+            birthdayToDelete.ReplaceWith(ConvertToXmlBirthdayRecord(rawBirthday));
+            document.Save(FILE_PATH);
+        }
+        else 
+        {
+            throw new InvalidOperationException("Root Element is null");
+        }
     }
 
     // TODO: Refactor parsing in async way

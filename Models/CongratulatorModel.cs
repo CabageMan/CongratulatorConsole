@@ -3,28 +3,29 @@ using Datasource;
 
 namespace Models;
 
-public class CongratulatorModel 
+public class CongratulatorModel
 {
-    private IDatasource datasource;
+    private readonly IDatasource datasource;
     public List<BirthdayUser> BirthdayUsers { get; set; }
 
-    public CongratulatorModel() {
+    public CongratulatorModel()
+    {
         datasource = new FileDatasource();
         BirthdayUsers = ConvertFromRawBirthdays(datasource.GetAllBirthdays());
     }
 
     // Could throw an error if validation or adding is failed
-    public bool AddNewBirthday(UserRole role, string firstName, string lastName, DateOnly birthDate) 
+    public bool AddNewBirthday(UserRole role, string firstName, string lastName, DateOnly birthDate)
     {
         // Add validations if names empty, role is wrong and birthday is in future in controller
         int lastUserId = BirthdayUsers.Count == 0 ? 0 : BirthdayUsers.Last().Id;
-        BirthdayUser newUser = new(++lastUserId, firstName, lastName, birthDate, role); 
+        BirthdayUser newUser = new(++lastUserId, firstName, lastName, birthDate, role);
         BirthdayUsers.Add(newUser);
 
         datasource.AddNewBirthday(new RawBirthday(
-            newUser.Id, 
-            newUser.Role.ToString(), 
-            newUser.FirstName, 
+            newUser.Id,
+            newUser.Role.ToString(),
+            newUser.FirstName,
             newUser.LastName,
             newUser.BirthDateString
             ));
@@ -35,24 +36,25 @@ public class CongratulatorModel
     // Could throw an error if deletion is failed
     public bool DeleteBirthdayBy(int birthdayId)
     {
-        // Find index or element and if it exists remove from class.
-        // var userToDeleteIndex = BirthdayUsers.FindIndex()
-        // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
-
-        // }
-        // datasource.PutAllBirthdays([]);
+        // Handle exceptions
         BirthdayUsers.RemoveAll(user => user.Id == birthdayId);
+        datasource.DeleteBirthdayBy(birthdayId);
         return true;
     }
 
     public bool EditBirthday(BirthdayUser editedBirthdayUser)
     {
-        // Find index or element and if it exists remove from class.
-        // var userToDeleteIndex = BirthdayUsers.FindIndex()
-        // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
-
-        // }
+        // Handle exceptions
         Console.WriteLine($"User Updated: {editedBirthdayUser.ToString()}");
+        int editedUserIndex = BirthdayUsers.FindIndex(user => user.Id == editedBirthdayUser.Id);
+        BirthdayUsers[editedUserIndex] = editedBirthdayUser;
+        datasource.ReplaceBirthday(new RawBirthday(
+            editedBirthdayUser.Id,
+            editedBirthdayUser.Role.ToString(),
+            editedBirthdayUser.FirstName,
+            editedBirthdayUser.LastName,
+            editedBirthdayUser.BirthDateString
+        ));
 
         return true;
     }
@@ -60,7 +62,8 @@ public class CongratulatorModel
     private static List<BirthdayUser> ConvertFromRawBirthdays(List<RawBirthday> rawBirthdays)
     {
         List<BirthdayUser> birthdayUsers = [];
-        foreach (RawBirthday rawBirthday in rawBirthdays) {
+        foreach (RawBirthday rawBirthday in rawBirthdays)
+        {
             if (
                 Enum.TryParse(rawBirthday.RoleString, true, out UserRole role) &&
                 DateOnly.TryParse(rawBirthday.BirthDateString, out DateOnly birthDate))
@@ -75,17 +78,9 @@ public class CongratulatorModel
             }
             else
             {
-                throw new Exception();
+                throw new InvalidOperationException("Could not parse role or date");
             }
         }
         return birthdayUsers;
-
-        /*
-        return rawBirthdays.Select(rawBirthday => {
-            Enum.TryParse(rawBirthday.RoleString, out UserRole userRole);
-            DateOnly.TryParse(rawBirthday.BirthDateString, out DateOnly birthDate);
-            return new BirthdayUser(rawBirthday.Id, rawBirthday.FirstName, rawBirthday.LastName, birthDate, userRole);
-        }).ToList();
-        */
     }
 }

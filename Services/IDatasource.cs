@@ -50,7 +50,8 @@ public struct RawBirthday(
 public interface IDatasource
 {
     List<RawBirthday> GetAllBirthdays();
-    void PutAllBirthdays(List<RawBirthday> rawBirthdays);
     void AddNewBirthday(RawBirthday rawBirthday);
+    void DeleteBirthdayBy(int birthdayId);
+    void ReplaceBirthday(RawBirthday rawBirthday);
 }
 

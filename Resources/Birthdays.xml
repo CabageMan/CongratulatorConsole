@@ -21,11 +21,4 @@
     <LastName>Jhonson</LastName>
     <BirthDate>10.15.1988</BirthDate>
   </BirthdayRecord>
-  <BirthdayRecord>
-    <Id>4</Id>
-    <Role>FamilarPerson</Role>
-    <FirstName>John</FirstName>
-    <LastName>Weak</LastName>
-    <BirthDate>01-03-1963</BirthDate>
-  </BirthdayRecord>
 </Root>
