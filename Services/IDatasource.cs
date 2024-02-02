@@ -49,7 +49,8 @@ public struct RawBirthday(
 
 public interface IDatasource
 {
-    List<RawBirthday> GetAllBirthdayUsers();
-    bool PutAllBirthdayUsers(List<RawBirthday> rawBirthdays);
+    List<RawBirthday> GetAllBirthdays();
+    void PutAllBirthdays(List<RawBirthday> rawBirthdays);
+    void AddNewBirthday(RawBirthday rawBirthday);
 }
 

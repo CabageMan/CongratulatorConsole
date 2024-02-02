@@ -1,26 +1,31 @@
-<?xml version="1.0" encoding="UTF-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Root>
-    <BirthdayUser>
-        <Id>1</Id>
-        <Role>FamilarPerson</Role>
-        <FirstName>Blob</FirstName>
-        <LastName>Jr</LastName>
-        <BirthDate>02.03.2004</BirthDate>
-    </BirthdayUser>
- 
-    <BirthdayUser>
-        <Id>2</Id>
-        <Role>Friend</Role>
-        <FirstName>Blob</FirstName>
-        <LastName>Sr</LastName>
-        <BirthDate>09.21.1973</BirthDate>
-    </BirthdayUser>
-
-    <BirthdayUser>
-        <Id>3</Id>
-        <Role>Colleague</Role>
-        <FirstName>Greg</FirstName>
-        <LastName>Jhonson</LastName>
-        <BirthDate>10.15.1988</BirthDate>
-    </BirthdayUser>
+  <BirthdayRecord>
+    <Id>1</Id>
+    <Role>FamilarPerson</Role>
+    <FirstName>Blob</FirstName>
+    <LastName>Jr</LastName>
+    <BirthDate>02.03.2004</BirthDate>
+  </BirthdayRecord>
+  <BirthdayRecord>
+    <Id>2</Id>
+    <Role>Friend</Role>
+    <FirstName>Blob</FirstName>
+    <LastName>Sr</LastName>
+    <BirthDate>09.21.1973</BirthDate>
+  </BirthdayRecord>
+  <BirthdayRecord>
+    <Id>3</Id>
+    <Role>Colleague</Role>
+    <FirstName>Greg</FirstName>
+    <LastName>Jhonson</LastName>
+    <BirthDate>10.15.1988</BirthDate>
+  </BirthdayRecord>
+  <BirthdayRecord>
+    <Id>4</Id>
+    <Role>FamilarPerson</Role>
+    <FirstName>John</FirstName>
+    <LastName>Weak</LastName>
+    <BirthDate>01-03-1963</BirthDate>
+  </BirthdayRecord>
 </Root>

@@ -10,7 +10,7 @@ public class CongratulatorModel
 
     public CongratulatorModel() {
         datasource = new FileDatasource();
-        BirthdayUsers = ConvertFromRawBirthdays(datasource.GetAllBirthdayUsers());
+        BirthdayUsers = ConvertFromRawBirthdays(datasource.GetAllBirthdays());
     }
 
     // Could throw an error if validation or adding is failed
@@ -18,7 +18,17 @@ public class CongratulatorModel
     {
         // Add validations if names empty, role is wrong and birthday is in future in controller
         int lastUserId = BirthdayUsers.Count == 0 ? 0 : BirthdayUsers.Last().Id;
-        BirthdayUsers.Add(new(++lastUserId, firstName, lastName, birthDate, role));
+        BirthdayUser newUser = new(++lastUserId, firstName, lastName, birthDate, role); 
+        BirthdayUsers.Add(newUser);
+
+        datasource.AddNewBirthday(new RawBirthday(
+            newUser.Id, 
+            newUser.Role.ToString(), 
+            newUser.FirstName, 
+            newUser.LastName,
+            newUser.BirthDateString
+            ));
+
         return true;
     }
 
@@ -30,7 +40,7 @@ public class CongratulatorModel
         // if (BirthdayUsers.Select(user => user.Id).Contains(userId)) {
 
         // }
-        datasource.PutAllBirthdayUsers([]);
+        // datasource.PutAllBirthdays([]);
         BirthdayUsers.RemoveAll(user => user.Id == birthdayId);
         return true;
     }
