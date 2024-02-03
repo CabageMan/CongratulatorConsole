@@ -6,29 +6,28 @@ namespace Models;
 public class CongratulatorModel
 {
     private readonly IDatasource datasource;
-    public List<BirthdayUser> BirthdayUsers { get; set; }
+    public List<BirthdayPerson> BirthdayPersons { get; set; }
 
     public CongratulatorModel()
     {
         datasource = new FileDatasource();
-        BirthdayUsers = ConvertFromRawBirthdays(datasource.GetAllBirthdays());
+        BirthdayPersons = ConvertFromRawBirthdays(datasource.GetAllBirthdays());
     }
 
     // Could throw an error if validation or adding is failed
-    public bool AddNewBirthday(UserRole role, string firstName, string lastName, DateOnly birthDate)
+    public bool AddNewBirthday(PersonRole role, string firstName, string lastName, DateOnly birthDate)
     {
         // Add validations if names empty, role is wrong and birthday is in future in controller
-        int lastUserId = BirthdayUsers.Count == 0 ? 0 : BirthdayUsers.Last().Id;
-        BirthdayUser newUser = new(++lastUserId, firstName, lastName, birthDate, role);
-        BirthdayUsers.Add(newUser);
+        int lastPersonId = BirthdayPersons.Count == 0 ? 0 : BirthdayPersons.Last().Id;
+        BirthdayPerson newPerson = new(++lastPersonId, firstName, lastName, birthDate, role);
+        BirthdayPersons.Add(newPerson);
 
         datasource.AddNewBirthday(new RawBirthday(
-            newUser.Id,
-            newUser.Role.ToString(),
-            newUser.FirstName,
-            newUser.LastName,
-            newUser.BirthDateString
-            ));
+            newPerson.Id,
+            newPerson.RoleString,
+            newPerson.FirstName,
+            newPerson.LastName,
+            newPerson.BirthDateString));
 
         return true;
     }
@@ -37,38 +36,37 @@ public class CongratulatorModel
     public bool DeleteBirthdayBy(int birthdayId)
     {
         // Handle exceptions
-        BirthdayUsers.RemoveAll(user => user.Id == birthdayId);
+        BirthdayPersons.RemoveAll(person => person.Id == birthdayId);
         datasource.DeleteBirthdayBy(birthdayId);
         return true;
     }
 
-    public bool EditBirthday(BirthdayUser editedBirthdayUser)
+    public bool EditBirthday(BirthdayPerson editedBirthdayPerson)
     {
         // Handle exceptions
-        Console.WriteLine($"User Updated: {editedBirthdayUser.ToString()}");
-        int editedUserIndex = BirthdayUsers.FindIndex(user => user.Id == editedBirthdayUser.Id);
-        BirthdayUsers[editedUserIndex] = editedBirthdayUser;
+        int editedPersonIndex = BirthdayPersons.FindIndex(person => person.Id == editedBirthdayPerson.Id);
+        BirthdayPersons[editedPersonIndex] = editedBirthdayPerson;
         datasource.ReplaceBirthday(new RawBirthday(
-            editedBirthdayUser.Id,
-            editedBirthdayUser.Role.ToString(),
-            editedBirthdayUser.FirstName,
-            editedBirthdayUser.LastName,
-            editedBirthdayUser.BirthDateString
+            editedBirthdayPerson.Id,
+            editedBirthdayPerson.RoleString,
+            editedBirthdayPerson.FirstName,
+            editedBirthdayPerson.LastName,
+            editedBirthdayPerson.BirthDateString
         ));
 
         return true;
     }
 
-    private static List<BirthdayUser> ConvertFromRawBirthdays(List<RawBirthday> rawBirthdays)
+    private static List<BirthdayPerson> ConvertFromRawBirthdays(List<RawBirthday> rawBirthdays)
     {
-        List<BirthdayUser> birthdayUsers = [];
+        List<BirthdayPerson> birthdayPersons = [];
         foreach (RawBirthday rawBirthday in rawBirthdays)
         {
             if (
-                Enum.TryParse(rawBirthday.RoleString, true, out UserRole role) &&
+                Enum.TryParse(rawBirthday.RoleString, true, out PersonRole role) &&
                 DateOnly.TryParse(rawBirthday.BirthDateString, out DateOnly birthDate))
             {
-                birthdayUsers.Add(new(
+                birthdayPersons.Add(new(
                     rawBirthday.Id,
                     rawBirthday.FirstName,
                     rawBirthday.LastName,
@@ -81,6 +79,6 @@ public class CongratulatorModel
                 throw new InvalidOperationException("Could not parse role or date");
             }
         }
-        return birthdayUsers;
+        return birthdayPersons;
     }
 }

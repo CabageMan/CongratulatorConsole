@@ -9,28 +9,28 @@ namespace Controllers;
 public class MenuController(
     Action showBirthdays,
     Action showUpcommingBirthdays,
-    Action<string, string, UserRole, DateOnly> addNewBirthday,
+    Action<string, string, PersonRole, DateOnly> addNewBirthday,
     Action showBirthdaysToDelete,
     Action<int> deleteBirthday,
     Action showBirthdaysToEdit,
-    Action<BirthdayUser> editBirthday)
+    Action<BirthdayPerson> editBirthday)
 {
     private const ConsoleColor TITLE_COLOR = ConsoleColor.Green;
     private const ConsoleColor ITEM_COLOR = ConsoleColor.Blue;
     private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
     private const ConsoleColor WARNING_COLOR = ConsoleColor.Magenta;
 
-    enum MainMenuItem 
+    enum MainMenuItem
     {
         ShowAll = 1,
         ShowUpcoming,
         AddNew,
         Delete,
-        Edit, 
+        Edit,
         Exit
     }
 
-    public enum BirthdaysListMenuItem
+    public enum BirthdaysActionMenuItem
     {
         ShowAll,
         ShowUpcomming,
@@ -42,62 +42,64 @@ public class MenuController(
 
     private readonly Action _showBirthdays = showBirthdays;
     private readonly Action _showUpcommingBirthdays = showUpcommingBirthdays;
-    private readonly Action<string, string, UserRole, DateOnly> _addNewBirthday = addNewBirthday;
+    private readonly Action<string, string, PersonRole, DateOnly> _addNewBirthday = addNewBirthday;
     private readonly Action _showBirthdaysToDelete = showBirthdaysToDelete;
     private readonly Action<int> _deleteBirthday = deleteBirthday;
     private readonly Action _showBirthdaysToEdit = showBirthdaysToEdit;
-    private readonly Action<BirthdayUser> _editBirthday = editBirthday;
+    private readonly Action<BirthdayPerson> _editBirthday = editBirthday;
 
-    public void Start() 
+    public void Start()
     {
         Console.Clear();
-        while(!exitApp)
+        while (!exitApp)
         {
             ShowMainMenu();
         }
     }
 
     // Show menus 
-    private void ShowMainMenu() 
+    private void ShowMainMenu()
     {
         ShowMenuTitle("Enter a number of menu item:");
         ShowMenuItems<MainMenuItem>();
         HandleSelectedMainMenuItem(GetUsersMenuItemInput<MainMenuItem>());
     }
 
-    private void ShowAddUserMenu() 
+// TODO: Give an oportunity to leave this menu, like in deleting or editing
+// TODO: Also make possible to skip items and left previous value
+    private void ShowAddBirthdayMenu()
     {
         Console.Clear();
-        ShowMenuTitle("Select user role:");
-        ShowMenuItems<UserRole>();
-        HandleAddingNewUser(GetUsersMenuItemInput<UserRole>());
+        ShowMenuTitle("Select person role:");
+        ShowMenuItems<PersonRole>();
+        HandleAddingNewPerson(GetUsersMenuItemInput<PersonRole>());
     }
 
     public void ShowBirthdaysListWithAction(
-        List<BirthdayUser> birthdayUsers, 
-        BirthdaysListMenuItem action)
+        List<BirthdayPerson> birthdayPersons,
+        BirthdaysActionMenuItem action)
     {
         switch (action)
         {
-            case BirthdaysListMenuItem.ShowAll:
+            case BirthdaysActionMenuItem.ShowAll:
                 ShowMenuTitle("All birthdays list:");
-                ShowBirthdaysList(birthdayUsers);
+                ShowBirthdaysList(birthdayPersons);
                 GetOnlyExitUserInput();
                 break;
-            case BirthdaysListMenuItem.ShowUpcomming:
+            case BirthdaysActionMenuItem.ShowUpcomming:
                 ShowMenuTitle("Today and upcomming birthdays:");
-                ShowBirthdaysList(birthdayUsers);
+                ShowBirthdaysList(birthdayPersons);
                 GetOnlyExitUserInput();
                 break;
-            case BirthdaysListMenuItem.Delete:
+            case BirthdaysActionMenuItem.Delete:
                 ShowMenuTitle("Enter birthday ID to delete: ");
-                ShowBirthdaysList(birthdayUsers);       
-                GetDeleteBirthdayUserInput(birthdayUsers.Select(user => user.Id));
+                ShowBirthdaysList(birthdayPersons);
+                GetDeleteBirthdayUserInput(birthdayPersons.Select(person => person.Id));
                 break;
-            case BirthdaysListMenuItem.Edit:
+            case BirthdaysActionMenuItem.Edit:
                 ShowMenuTitle("Enter birthday ID to edit: ");
-                ShowBirthdaysList(birthdayUsers);       
-                GetEditBirthdayUserInput(birthdayUsers);
+                ShowBirthdaysList(birthdayPersons);
+                GetEditBirthdayUserInput(birthdayPersons);
                 break;
         }
     }
@@ -109,10 +111,10 @@ public class MenuController(
         Console.WriteLine(title + Environment.NewLine, Console.ForegroundColor);
     }
 
-    private static void ShowMenuItems<E>() where E: Enum 
+    private static void ShowMenuItems<E>() where E : Enum
     {
         Console.ForegroundColor = ITEM_COLOR;
-        foreach(int enumItem in Enum.GetValues(typeof(E))) 
+        foreach (int enumItem in Enum.GetValues(typeof(E)))
         {
             Console.Write($"\t{enumItem} - ");
             Console.WriteLine($"{Enum.GetName(typeof(E), enumItem)}");
@@ -120,53 +122,71 @@ public class MenuController(
         Console.Write(Environment.NewLine);
     }
 
-    private static void ShowBirthdaysList(List<BirthdayUser> birthdayUsers) 
+    private static void ShowBirthdaysList(List<BirthdayPerson> birthdayPersons)
     {
-        if (birthdayUsers.Count != 0) {
-            DrawBirthdaysTable(birthdayUsers);
-        } else {
+        if (birthdayPersons.Count != 0)
+        {
+            DrawBirthdaysTable(birthdayPersons);
+        }
+        else
+        {
             Console.ForegroundColor = WARNING_COLOR;
-            Console.WriteLine("There are no birthdays records yet", Console.ForegroundColor);
+            Console.WriteLine("There are no birthdays records yet");
             Console.ForegroundColor = ITEM_COLOR;
         }
     }
 
-    private static void DrawBirthdaysTable(List<BirthdayUser> birthdayUsers) 
+    private static void DrawBirthdaysTable(List<BirthdayPerson> birthdayPersons)
     {
         string spacer = " | ";
         var spaceLength = spacer.Length;
-        var idColumnLength = birthdayUsers.Select(user => user.Id.ToString().Length).Max() + spaceLength;
-        var roleColumnLength = birthdayUsers.Select(user => user.Role.ToString().Length).Max() + spaceLength;
-        var nameColumnLength = birthdayUsers.Select(user => user.FullName.Length).Max() + spaceLength;
-        var birthDateColumnLength = birthdayUsers.Select(user => user.BirthDateString.Length).Max() + spaceLength;
+        var idColumnLength = birthdayPersons
+            .Select(person => person.Id.ToString().Length)
+            .Max() + spaceLength;
+        var roleColumnLength = birthdayPersons
+            .Select(person => person.RoleString.Length)
+            .Max() + spaceLength;
+        var nameColumnLength = birthdayPersons
+            .Select(person => person.FullName.Length)
+            .Max() + spaceLength;
+        var birthDateColumnLength = birthdayPersons
+            .Select(person => person.BirthDateString.Length)
+            .Max() + spaceLength;
 
-        var titlesWithSpaces = new(string title, int space) [] { 
-            ("ID", idColumnLength), 
-            ("Role", roleColumnLength), 
-            ("Name", nameColumnLength), 
-            ("Birth Date", birthDateColumnLength) 
+        var titlesWithSpaces = new (string title, int space)[] {
+            ("ID", idColumnLength),
+            ("Role", roleColumnLength),
+            ("Name", nameColumnLength),
+            ("Birth Date", birthDateColumnLength)
         };
         DrawTableHeader(titlesWithSpaces, spacer);
 
-        foreach(BirthdayUser user in birthdayUsers) {
+        foreach (BirthdayPerson person in birthdayPersons)
+        {
+            // Console.WriteLine(
+            //     $"{user.Id}{WhiteSpaces(idColumnLength - user.Id.ToString().Length)}{spacer}" +
+            //     $"{user.Role}{WhiteSpaces(roleColumnLength - user.Role.ToString().Length)}{spacer}" +
+            //     $"{user.FullName}{WhiteSpaces(nameColumnLength - user.FullName.Length)}{spacer}" +
+            //     $"{user.BirthDateString}{WhiteSpaces(birthDateColumnLength - user.BirthDateString.Length)}{spacer}"
+            // );
             Console.WriteLine(
-                $"{user.Id}{WhiteSpaces(idColumnLength - user.Id.ToString().Length)}{spacer}" + 
-                $"{user.Role}{WhiteSpaces(roleColumnLength - user.Role.ToString().Length)}{spacer}" +
-                $"{user.FullName}{WhiteSpaces(nameColumnLength - user.FullName.Length)}{spacer}" +
-                $"{user.BirthDateString}{WhiteSpaces(birthDateColumnLength - user.BirthDateString.Length)}{spacer}"
+                person.Id + WhiteSpaces(idColumnLength - person.Id.ToString().Length) + spacer +
+                person.Role + WhiteSpaces(roleColumnLength - person.RoleString.Length)+ spacer +
+                person.FullName + WhiteSpaces(nameColumnLength - person.FullName.Length) + spacer +
+                person.BirthDateString + WhiteSpaces(birthDateColumnLength - person.BirthDateString.Length) + spacer
             );
         }
 
         Console.Write(Environment.NewLine);
     }
 
-    private static void DrawTableHeader((string, int)[] titlesWithSpaces, string spacer) 
+    private static void DrawTableHeader((string, int)[] titlesWithSpaces, string spacer)
     {
         Console.ForegroundColor = WARNING_COLOR;
-        foreach((string title, int space) in titlesWithSpaces)
+        foreach ((string title, int space) in titlesWithSpaces)
         {
             var whiteSpace = WhiteSpaces(space - title.Length);
-            Console.Write($"{title}{whiteSpace}{spacer}");
+            Console.Write(title + whiteSpace + spacer);
         }
         Console.Write(Environment.NewLine);
         Console.ForegroundColor = ITEM_COLOR;
@@ -178,7 +198,7 @@ public class MenuController(
     }
 
     // Get user input
-    private static E GetUsersMenuItemInput<E>() where E: Enum
+    private static E GetUsersMenuItemInput<E>() where E : Enum
     {
         int menuItemsCount = Enum.GetValues(typeof(E)).Length;
         Console.Write("> ");
@@ -188,10 +208,10 @@ public class MenuController(
         var allCases = (IEnumerable<int>)Enum.GetValues(typeof(E));
         var minValue = allCases.ToArray().Min();
 
-        while(!int.TryParse(userInput, out menuItemNumber) || !Enum.IsDefined(typeof(E), menuItemNumber))
+        while (!int.TryParse(userInput, out menuItemNumber) || !Enum.IsDefined(typeof(E), menuItemNumber))
         {
             Console.ForegroundColor = ERROR_COLOR;
-            Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between {minValue} and {menuItemsCount}", Console.ForegroundColor);            
+            Console.WriteLine($"There is no menu item with number {menuItemNumber}.{Environment.NewLine}Please enter number between {minValue} and {menuItemsCount}", Console.ForegroundColor);
             Console.ForegroundColor = ITEM_COLOR;
             Console.Write("> ");
             userInput = Console.ReadLine();
@@ -200,32 +220,32 @@ public class MenuController(
         return (E)Enum.ToObject(typeof(E), menuItemNumber);
     }
 
-    private static void GetOnlyExitUserInput() 
+    private static void GetOnlyExitUserInput()
     {
         var userInput = "";
         Console.ForegroundColor = TITLE_COLOR;
-        do 
+        do
         {
-
             Console.Write("Type \"x\" to return to the main menu\n> ");
             userInput = Console.ReadLine();
-        } while(userInput != "x");
+        } while (userInput != "x");
         Console.Clear();
     }
 
-    private void GetDeleteBirthdayUserInput(IEnumerable<int> birthdaysIdsList) 
+    private void GetDeleteBirthdayUserInput(IEnumerable<int> birthdaysIdsList)
     {
         Console.ForegroundColor = TITLE_COLOR;
-        while (true) 
+        while (true)
         {
             Console.Write("Enter birthday Id to delete or\ntype \"x\" to return to the main menu\n> ");
             var userInput = Console.ReadLine();
             if (userInput == "x")
             {
                 break;
-            } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
+            }
+            else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
             {
-                while (true) 
+                while (true)
                 {
                     Console.Write("Are you shure? yes/no\n> ");
                     var confirmInput = Console.ReadLine();
@@ -233,14 +253,15 @@ public class MenuController(
                     {
                         _deleteBirthday(selectedId);
                         break;
-                    } else if (confirmInput == "n" || confirmInput == "no")
+                    }
+                    else if (confirmInput == "n" || confirmInput == "no")
                     {
                         break;
                     }
                 }
                 break;
-            } 
-            else 
+            }
+            else
             {
                 continue;
             }
@@ -248,23 +269,24 @@ public class MenuController(
         Console.Clear();
     }
 
-    private void GetEditBirthdayUserInput(List<BirthdayUser> birthdayUsers)
+    private void GetEditBirthdayUserInput(List<BirthdayPerson> birthdayPersons)
     {
         Console.ForegroundColor = TITLE_COLOR;
-        while(true) 
+        while (true)
         {
             Console.Write("Enter birthday Id you want to edit or\ntype \"x\" to return to the main menu\n> ");
             var userInput = Console.ReadLine();
-            var birthdaysIdsList = birthdayUsers.Select(user => user.Id);
+            var birthdaysIdsList = birthdayPersons.Select(person => person.Id);
             if (userInput == "x")
             {
                 break;
-            } else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
+            }
+            else if (int.TryParse(userInput, out int selectedId) && birthdaysIdsList.Contains(selectedId))
             {
-                HandleEditingBirthday(birthdayUsers, selectedId);
+                HandleEditingBirthday(birthdayPersons, selectedId);
                 break;
-            } 
-            else 
+            }
+            else
             {
                 continue;
             }
@@ -272,13 +294,14 @@ public class MenuController(
         Console.Clear();
     }
 
-    private static DateOnly GetUserDateInput() 
+    private static DateOnly GetUserDateInput()
     {
         var inputBirthDateString = Console.ReadLine();
         var inputBirthDate = DateOnly.FromDateTime(DateTime.Now);
-        while(!DateOnly.TryParse(inputBirthDateString, out inputBirthDate)) {
+        while (!DateOnly.TryParse(inputBirthDateString, out inputBirthDate))
+        {
             Console.ForegroundColor = ERROR_COLOR;
-            Console.WriteLine($"Date input is incorrect {inputBirthDateString}.{Environment.NewLine}Please enter correct date in format MM/dd/yyyy", Console.ForegroundColor);            
+            Console.WriteLine($"Date input is incorrect {inputBirthDateString}.{Environment.NewLine}Please enter correct date in format MM/dd/yyyy", Console.ForegroundColor);
             Console.ForegroundColor = ITEM_COLOR;
             Console.Write("> ");
             inputBirthDateString = Console.ReadLine();
@@ -287,11 +310,11 @@ public class MenuController(
     }
 
     // Handle User Input
-    private void HandleSelectedMainMenuItem(MainMenuItem item) 
+    private void HandleSelectedMainMenuItem(MainMenuItem item)
     {
         Console.Clear();
 
-        switch (item) 
+        switch (item)
         {
             case MainMenuItem.ShowAll:
                 _showBirthdays();
@@ -300,7 +323,7 @@ public class MenuController(
                 _showUpcommingBirthdays();
                 break;
             case MainMenuItem.AddNew:
-                ShowAddUserMenu();
+                ShowAddBirthdayMenu();
                 break;
             case MainMenuItem.Delete:
                 _showBirthdaysToDelete();
@@ -315,52 +338,57 @@ public class MenuController(
         }
     }
 
-    private void HandleAddingNewUser(UserRole userRole) {
+    private void HandleAddingNewPerson(PersonRole personRole)
+    {
         Console.Clear();
-        Console.WriteLine($"Enter new {userRole} first name:{Environment.NewLine}");
+        Console.WriteLine($"Enter new {personRole} first name:{Environment.NewLine}");
         Console.Write("> ");
-        var userFirstName = Console.ReadLine();
+        var personFirstName = Console.ReadLine();
 
-        Console.WriteLine($"Enter {userFirstName}'s last name:{Environment.NewLine}");
+        Console.WriteLine($"Enter {personFirstName}'s last name:{Environment.NewLine}");
         Console.Write("> ");
-        var userLastName = Console.ReadLine();
+        var personLastName = Console.ReadLine();
 
-        Console.WriteLine($"Enter {userFirstName}'s {userLastName} bith date in format MM/dd/yyyy:{Environment.NewLine}");
+        Console.WriteLine($"Enter {personFirstName}'s {personLastName} bith date in format MM/dd/yyyy:{Environment.NewLine}");
         Console.Write("> ");
-        var userBirthDate = GetUserDateInput();
+        var personBirthDate = GetUserDateInput();
 
-        _addNewBirthday(userFirstName ?? "", userLastName ?? "", userRole, userBirthDate);
+        _addNewBirthday(
+            personFirstName ?? "",
+            personLastName ?? "",
+            personRole,
+            personBirthDate);
 
         Console.Clear();
     }
 
-    private void HandleEditingBirthday(List<BirthdayUser> birthdayUsers, int selectedId)
+    private void HandleEditingBirthday(List<BirthdayPerson> birthdayPersons, int selectedId)
     {
-        var selectedUser = birthdayUsers.Find(user => user.Id == selectedId);
+        var selectedPerson = birthdayPersons.Find(person => person.Id == selectedId);
         Console.Clear();
-        ShowMenuTitle($"Current Role is {selectedUser.Role} enter new one:");
-        ShowMenuItems<UserRole>();
-        var updateRole = GetUsersMenuItemInput<UserRole>();
+        ShowMenuTitle($"Current Role is {selectedPerson.Role} enter new one:");
+        ShowMenuItems<PersonRole>();
+        var updatedRole = GetUsersMenuItemInput<PersonRole>();
 
         Console.Clear();
-        Console.WriteLine($"Current First Name is {selectedUser.FirstName} enter new one:{Environment.NewLine}");
+        Console.WriteLine($"Current First Name is {selectedPerson.FirstName} enter new one:{Environment.NewLine}");
         Console.Write("> ");
         var updatedFirstName = Console.ReadLine() ?? "";
 
-        Console.WriteLine($"Current Last Name is {selectedUser.LastName} ented new one:{Environment.NewLine}");
+        Console.WriteLine($"Current Last Name is {selectedPerson.LastName} ented new one:{Environment.NewLine}");
         Console.Write("> ");
         var updatedLastName = Console.ReadLine() ?? "";
 
-        Console.WriteLine($"Current Birth Date is {selectedUser.BirthDateString} enter new one in format MM/dd/yyyy:{Environment.NewLine}");
+        Console.WriteLine($"Current Birth Date is {selectedPerson.BirthDateString} enter new one in format MM/dd/yyyy:{Environment.NewLine}");
         Console.Write("> ");
         var updatedBirthDate = GetUserDateInput();
 
-        _editBirthday(new BirthdayUser(
+        _editBirthday(new BirthdayPerson(
             selectedId,
             updatedFirstName,
-            updatedLastName, 
-            updatedBirthDate, 
-            updateRole)
+            updatedLastName,
+            updatedBirthDate,
+            updatedRole)
             );
 
         Console.Clear();

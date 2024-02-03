@@ -15,10 +15,10 @@
     <BirthDate>09.21.1973</BirthDate>
   </BirthdayRecord>
   <BirthdayRecord>
-    <Id>3</Id>
-    <Role>Colleague</Role>
-    <FirstName>Greg</FirstName>
-    <LastName>Jhonson</LastName>
-    <BirthDate>10.15.1988</BirthDate>
+    <Id>4</Id>
+    <Role>Friend</Role>
+    <FirstName>Tomas</FirstName>
+    <LastName>Morrow</LastName>
+    <BirthDate>02-05-1978</BirthDate>
   </BirthdayRecord>
 </Root>
