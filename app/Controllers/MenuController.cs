@@ -48,6 +48,14 @@ public class MenuController(
     private readonly Action _showBirthdaysToEdit = showBirthdaysToEdit;
     private readonly Action<BirthdayPerson> _editBirthday = editBirthday;
 
+    private List<string> _warnings = [];
+
+    public List<string> Warnings
+    {
+        get => _warnings;
+        set => _warnings = value;
+    }
+
     public void Start()
     {
         Console.Clear();
@@ -60,16 +68,18 @@ public class MenuController(
     // Show menus 
     private void ShowMainMenu()
     {
-        ShowMenuTitle("Enter a number of menu item:");
+        ShowWarnigsIfExist(_warnings);
+        ShowMenuTitle("Enter a number of menu item:" + _warnings.Count);
         ShowMenuItems<MainMenuItem>();
         HandleSelectedMainMenuItem(GetUsersMenuItemInput<MainMenuItem>());
     }
 
-// TODO: Give an oportunity to leave this menu, like in deleting or editing
-// TODO: Also make possible to skip items and left previous value
+    // TODO: Give an oportunity to leave this menu, like in deleting or editing
+    // TODO: Also make possible to skip items and left previous value
     private void ShowAddBirthdayMenu()
     {
         Console.Clear();
+        ShowWarnigsIfExist(_warnings);
         ShowMenuTitle("Select person role:");
         ShowMenuItems<PersonRole>();
         HandleAddingNewPerson(GetUsersMenuItemInput<PersonRole>());
@@ -82,21 +92,25 @@ public class MenuController(
         switch (action)
         {
             case BirthdaysActionMenuItem.ShowAll:
+                ShowWarnigsIfExist(_warnings);
                 ShowMenuTitle("All birthdays list:");
                 ShowBirthdaysList(birthdayPersons);
                 GetOnlyExitUserInput();
                 break;
             case BirthdaysActionMenuItem.ShowUpcomming:
+                ShowWarnigsIfExist(_warnings);
                 ShowMenuTitle("Today and upcomming birthdays:");
                 ShowBirthdaysList(birthdayPersons);
                 GetOnlyExitUserInput();
                 break;
             case BirthdaysActionMenuItem.Delete:
+                ShowWarnigsIfExist(_warnings);
                 ShowMenuTitle("Enter birthday ID to delete: ");
                 ShowBirthdaysList(birthdayPersons);
                 GetDeleteBirthdayUserInput(birthdayPersons.Select(person => person.Id));
                 break;
             case BirthdaysActionMenuItem.Edit:
+                ShowWarnigsIfExist(_warnings);
                 ShowMenuTitle("Enter birthday ID to edit: ");
                 ShowBirthdaysList(birthdayPersons);
                 GetEditBirthdayUserInput(birthdayPersons);
@@ -105,6 +119,19 @@ public class MenuController(
     }
 
     // Draw content in console
+    private static void ShowWarnigsIfExist(List<string> warnings)
+    {
+        if (warnings.Count != 0)
+        {
+            Console.ForegroundColor = WARNING_COLOR;
+            Console.WriteLine("We have some promlems: ");
+            foreach (string warningMessage in warnings)
+            {
+                Console.WriteLine("  -" + warningMessage + ";");
+            }
+            Console.Write(Environment.NewLine);
+        }
+    }
     private static void ShowMenuTitle(string title)
     {
         Console.ForegroundColor = TITLE_COLOR;
@@ -163,15 +190,9 @@ public class MenuController(
 
         foreach (BirthdayPerson person in birthdayPersons)
         {
-            // Console.WriteLine(
-            //     $"{user.Id}{WhiteSpaces(idColumnLength - user.Id.ToString().Length)}{spacer}" +
-            //     $"{user.Role}{WhiteSpaces(roleColumnLength - user.Role.ToString().Length)}{spacer}" +
-            //     $"{user.FullName}{WhiteSpaces(nameColumnLength - user.FullName.Length)}{spacer}" +
-            //     $"{user.BirthDateString}{WhiteSpaces(birthDateColumnLength - user.BirthDateString.Length)}{spacer}"
-            // );
             Console.WriteLine(
                 person.Id + WhiteSpaces(idColumnLength - person.Id.ToString().Length) + spacer +
-                person.Role + WhiteSpaces(roleColumnLength - person.RoleString.Length)+ spacer +
+                person.Role + WhiteSpaces(roleColumnLength - person.RoleString.Length) + spacer +
                 person.FullName + WhiteSpaces(nameColumnLength - person.FullName.Length) + spacer +
                 person.BirthDateString + WhiteSpaces(birthDateColumnLength - person.BirthDateString.Length) + spacer
             );
@@ -297,8 +318,11 @@ public class MenuController(
     private static DateOnly GetUserDateInput()
     {
         var inputBirthDateString = Console.ReadLine();
-        var inputBirthDate = DateOnly.FromDateTime(DateTime.Now);
-        while (!DateOnly.TryParse(inputBirthDateString, out inputBirthDate))
+        var currentDate = DateOnly.FromDateTime(DateTime.Now);
+        var inputBirthDate = currentDate;
+        while (
+            !DateOnly.TryParse(inputBirthDateString, out inputBirthDate) ||
+            inputBirthDate > currentDate)
         {
             Console.ForegroundColor = ERROR_COLOR;
             Console.WriteLine($"Date input is incorrect {inputBirthDateString}.{Environment.NewLine}Please enter correct date in format MM/dd/yyyy", Console.ForegroundColor);
@@ -349,7 +373,7 @@ public class MenuController(
         Console.Write("> ");
         var personLastName = Console.ReadLine();
 
-        Console.WriteLine($"Enter {personFirstName}'s {personLastName} bith date in format MM/dd/yyyy:{Environment.NewLine}");
+        Console.WriteLine($"Enter {personFirstName}'s {personLastName} bith date in format MM/dd/yyyy (not future dates):{Environment.NewLine}");
         Console.Write("> ");
         var personBirthDate = GetUserDateInput();
 

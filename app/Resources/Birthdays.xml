@@ -21,4 +21,11 @@
     <LastName>Morrow</LastName>
     <BirthDate>02-05-1978</BirthDate>
   </BirthdayRecord>
+  <BirthdayRecord>
+    <Id>5</Id>
+    <Role>FamilarPerson</Role>
+    <FirstName>Blob</FirstName>
+    <LastName>Awesome</LastName>
+    <BirthDate>02-05-2024</BirthDate>
+  </BirthdayRecord>
 </Root>

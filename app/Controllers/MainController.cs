@@ -17,7 +17,8 @@ public class MainController
             DeleteBirthday,
             ShowBirthdaysToEdit,
             EditBirthday);
-        congratulatorModel = new CongratulatorModel();
+
+        congratulatorModel = new CongratulatorModel(message => menuController.Warnings.Add(message));
     }
 
     public void Start()
@@ -59,8 +60,14 @@ public class MainController
         PersonRole personRole,
         DateOnly birthDate)
     {
-        // ToDo: Check if date is not future, only real facts
-        congratulatorModel.AddNewBirthday(personRole, firstName, lastName, birthDate);
+        try
+        {
+            congratulatorModel.AddNewBirthday(personRole, firstName, lastName, birthDate);
+        }
+        catch (InvalidOperationException e)
+        {
+            menuController.Warnings.Add(e.Message);
+        }
     }
 
     private void ShowBirthdaysToDelete()
@@ -79,11 +86,25 @@ public class MainController
 
     private void DeleteBirthday(int Id)
     {
-        congratulatorModel.DeleteBirthdayBy(Id);
+        try
+        {
+            congratulatorModel.DeleteBirthdayBy(Id);
+        }
+        catch (InvalidOperationException e)
+        {
+            menuController.Warnings.Add(e.Message);
+        }
     }
 
     private void EditBirthday(BirthdayPerson editedBirthdayPerson)
     {
-        congratulatorModel.EditBirthday(editedBirthdayPerson);
+        try
+        {
+            congratulatorModel.EditBirthday(editedBirthdayPerson);
+        }
+        catch (InvalidOperationException e)
+        {
+            menuController.Warnings.Add(e.Message);
+        }
     }
 }
