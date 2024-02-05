@@ -28,4 +28,11 @@
     <LastName>Awesome</LastName>
     <BirthDate>02-05-2024</BirthDate>
   </BirthdayRecord>
+  <BirthdayRecord>
+    <Id>6</Id>
+    <Role>Colleague</Role>
+    <FirstName>Jack</FirstName>
+    <LastName>Black</LastName>
+    <BirthDate>02-05-1976</BirthDate>
+  </BirthdayRecord>
 </Root>

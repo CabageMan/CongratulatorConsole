@@ -6,9 +6,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GenerateProgramFile>false</GenerateProgramFile>
+    <!-- Find how change output directory -->
+    <!-- <IntermediateOutputPath>..\Build</IntermediateOutputPath> -->
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="Resources\*.*">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
     <PackageReference Include="NUnit" Version="4.0.1" />
     <PackageReference Include="Nunit3TestAdapter" Version="4.5.0" />
