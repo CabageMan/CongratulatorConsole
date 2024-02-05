@@ -14,9 +14,6 @@
     <Content Include="Resources\*.*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
-    <PackageReference Include="NUnit" Version="4.0.1" />
-    <PackageReference Include="Nunit3TestAdapter" Version="4.5.0" />
   </ItemGroup>
 
 </Project>
