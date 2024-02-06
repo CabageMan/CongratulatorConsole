@@ -12,7 +12,7 @@ public class MySqlDBConnection
     private string DB_Name = "";
     private string DB_UserName = "";
     private string DB_Password = "";
-    public MySqlConnection Connection { get; private set; }
+    public MySqlConnection? Connection { get; private set; }
 
     public static MySqlDBConnection Instance()
     {
@@ -37,23 +37,35 @@ public class MySqlDBConnection
                     CommandText = "CREATE DATABASE IF NOT EXISTS `congratulator_birthdays`;"
                 };
                 cmd.ExecuteNonQuery();
-
-                cmd.CommandText = "CREATE TABLE IF NOT EXISTS `Birthday` (" +
-                    "`id` INT AUTO_INCREMENT," +
-                    "`role` TEXT," +
-                    "`first_name` TEXT," +
-                    "`last_name` TEXT," +
-                    "`birth_date` DATE," +
-                    "PRIMARY KEY(id));"
-                ;
-                cmd.ExecuteNonQuery();
                 Connection.Close();
 
-                Connection = new MySqlConnection(GetConnectionString(true));
             }
             catch (MySqlException e)
             {
-                throw new InvalidOperationException("Could not create connection: " + e.Message);
+                throw new InvalidOperationException("Could not create DataBase: " + e.Message);
+            }
+
+            Connection = new MySqlConnection(GetConnectionString(true));
+            try
+            {
+                Connection.Open();
+                var cmd = new MySqlCommand
+                {
+                    Connection = Connection,
+                    CommandText = "CREATE TABLE IF NOT EXISTS `Birthday` (" +
+                        "`id` INT AUTO_INCREMENT," +
+                        "`role` TEXT," +
+                        "`first_name` TEXT," +
+                        "`last_name` TEXT," +
+                        "`birth_date` DATE," +
+                        "PRIMARY KEY(id));"
+                };
+                cmd.ExecuteNonQuery();
+                Connection.Close();
+            }
+            catch (MySqlException e)
+            {
+                throw new InvalidOperationException("Could not create table: " + e.Message);
             }
         }
     }
@@ -72,7 +84,7 @@ public class MySqlDBConnection
 
     public void Close()
     {
-        Connection.Close();
+        Connection?.Close();
     }
 
     public bool IsOpened

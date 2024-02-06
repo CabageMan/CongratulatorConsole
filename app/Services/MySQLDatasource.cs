@@ -19,15 +19,13 @@ public class MySQLDatasource : IDatasource
     List<RawBirthday> IDatasource.GetAllBirthdays()
     {
         MySqlDBConnection.Instance().Open();
-        // Console.WriteLine("Name from DB ");
-        // Console.ReadKey();
         if (MySqlDBConnection.Instance().IsOpened)
         {
             var connection = MySqlDBConnection.Instance().Connection;
             var command = new MySqlCommand
             {
                 Connection = connection,
-                CommandText = @"SELECT * FROM Game"
+                CommandText = @"SELECT * FROM Birthday"
             };
 
             var reader = command.ExecuteReader();
