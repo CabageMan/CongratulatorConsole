@@ -18,6 +18,7 @@ public class CongratulatorModelTests
     [Test]
     public void Should_Add_New_Birthday()
     {
-        Assert.Pass();
+        Assert.That(2+2, Is.EqualTo(4));
+        // Assert.Fail("Just fail this");
     }
 }
