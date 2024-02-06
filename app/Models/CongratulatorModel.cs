@@ -13,14 +13,15 @@ public class CongratulatorModel
     {
         try
         {
-            datasource = new FileDatasource();
+            // datasource = new FileDatasource();
+            datasource = new MySQLDatasource();
             BirthdayPersons = ConvertFromRawBirthdays(datasource.GetAllBirthdays());
         }
-        catch (DirectoryNotFoundException e)
+        catch (InvalidOperationException e) 
         {
             BirthdayPersons = [];
             datasource = null;
-            callback("Could not load data: " + e.Message);
+            callback(e.Message);
         }
     }
 

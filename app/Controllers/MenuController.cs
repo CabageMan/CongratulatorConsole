@@ -69,7 +69,7 @@ public class MenuController(
     private void ShowMainMenu()
     {
         ShowWarnigsIfExist(_warnings);
-        ShowMenuTitle("Enter a number of menu item:" + _warnings.Count);
+        ShowMenuTitle("Enter a number of menu item:");
         ShowMenuItems<MainMenuItem>();
         HandleSelectedMainMenuItem(GetUsersMenuItemInput<MainMenuItem>());
     }

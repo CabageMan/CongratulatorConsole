@@ -17,12 +17,18 @@ public class FileDatasource : IDatasource
     private const string LASTNAME_NODE_NAME = "LastName";
     private const string BIRTHDATE_NODE_NAME = "BirthDate";
 
-
     private readonly XDocument document;
 
     public FileDatasource()
     {
-        document = XDocument.Load(FILE_PATH);
+        try 
+        {
+            document = XDocument.Load(FILE_PATH);
+        }
+        catch (DirectoryNotFoundException e)
+        {
+            throw new InvalidOperationException(e.Message);
+        }
     }
 
     List<RawBirthday> IDatasource.GetAllBirthdays()
