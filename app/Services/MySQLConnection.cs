@@ -1,3 +1,4 @@
+using Microsoft.Extensions.Configuration;
 using MySql.Data.MySqlClient;
 
 namespace Datasource;
@@ -7,12 +8,23 @@ public class MySqlDBConnection
     private static MySqlDBConnection? _instance = null;
 
     // Get from environment variable
-    private string DB_Host = "localhost";
-    private string DB_Port = "3306";
-    private string DB_Name = "";
-    private string DB_UserName = "";
-    private string DB_Password = "";
+    private const string DB_HOST = "localhost";
+    private const string DB_PORT = "3306";
+    private const string DB_NAME = "congratulator_birthdays";
+    private readonly string? dbUserName;
+    private readonly string? dbPassword;
     public MySqlConnection? Connection { get; private set; }
+
+    public MySqlDBConnection()
+    {
+        IConfigurationRoot config = new ConfigurationBuilder()
+            .AddUserSecrets<MySqlDBConnection>()
+            .Build();
+        dbUserName = config["CongratulatorDataBase:UserName"];
+        dbPassword = config["CongratulatorDataBase:Password"];
+        // Console.WriteLine($"Name: {dbUserName}, Password: {dbPassword}");
+        // Console.ReadKey();
+    }
 
     public static MySqlDBConnection Instance()
     {
@@ -84,7 +96,10 @@ public class MySqlDBConnection
 
     public void Close()
     {
-        Connection?.Close();
+        if (Connection != null)
+        {
+            Connection.Close();
+        }
     }
 
     public bool IsOpened
@@ -96,8 +111,8 @@ public class MySqlDBConnection
     private string GetConnectionString(bool withDbName)
     {
         return withDbName ?
-            string.Format($"server={DB_Host}; port={DB_Port}; database={DB_Name}; uid={DB_UserName}; pwd={DB_Password}") :
-            string.Format($"server={DB_Host}; port={DB_Port}; uid={DB_UserName}; pwd={DB_Password}");
+            string.Format($"server={DB_HOST}; port={DB_PORT}; database={DB_NAME}; uid={dbUserName}; pwd={dbPassword}") :
+            string.Format($"server={DB_HOST}; port={DB_PORT}; uid={dbUserName}; pwd={dbPassword}");
     }
 }
 
