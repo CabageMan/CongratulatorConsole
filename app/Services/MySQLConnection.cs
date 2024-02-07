@@ -18,12 +18,11 @@ public class MySqlDBConnection
     public MySqlDBConnection()
     {
         IConfigurationRoot config = new ConfigurationBuilder()
+            .AddJsonFile("appSettings.json")
             .AddUserSecrets<MySqlDBConnection>()
             .Build();
-        dbUserName = config["CongratulatorDataBase:UserName"];
-        dbPassword = config["CongratulatorDataBase:Password"];
-        // Console.WriteLine($"Name: {dbUserName}, Password: {dbPassword}");
-        // Console.ReadKey();
+        dbUserName = config.GetSection("CongratulatorDataBase")["UserName"];
+        dbPassword = config.GetSection("CongratulatorDataBase")["Password"];
     }
 
     public static MySqlDBConnection Instance()
@@ -40,6 +39,7 @@ public class MySqlDBConnection
         if (Connection == null)
         {
             Connection = new MySqlConnection(GetConnectionString(false));
+            // TODO: Try do not open the new connection and change alreadry opened.
             try
             {
                 Connection.Open();
@@ -96,10 +96,7 @@ public class MySqlDBConnection
 
     public void Close()
     {
-        if (Connection != null)
-        {
-            Connection.Close();
-        }
+        Connection?.Close();
     }
 
     public bool IsOpened
