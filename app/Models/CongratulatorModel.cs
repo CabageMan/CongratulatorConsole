@@ -1,5 +1,6 @@
 using System.Runtime.Serialization;
 using Datasource;
+using Org.BouncyCastle.Asn1.Misc;
 
 namespace Models;
 
@@ -15,9 +16,9 @@ public class CongratulatorModel
         {
             // datasource = new FileDatasource();
             datasource = new MySQLDatasource();
-            BirthdayPersons = ConvertFromRawBirthdays(datasource.GetAllBirthdays());
+            BirthdayPersons = datasource.GetAllBirthdays();
         }
-        catch (InvalidOperationException e) 
+        catch (InvalidOperationException e)
         {
             BirthdayPersons = [];
             datasource = null;
@@ -31,22 +32,27 @@ public class CongratulatorModel
         string lastName,
         DateOnly birthDate)
     {
-        int lastPersonId = BirthdayPersons.Count == 0 ? 0 : BirthdayPersons.Last().Id;
-        BirthdayPerson newPerson = new(++lastPersonId, firstName, lastName, birthDate, role);
-        BirthdayPersons.Add(newPerson);
-
+        long lastPersonId = BirthdayPersons.Count == 0 ? 0 : BirthdayPersons.Last().Id;
         if (datasource != null)
         {
-            datasource.AddNewBirthday(new RawBirthday(
-                newPerson.Id,
-                newPerson.RoleString,
-                newPerson.FirstName,
-                newPerson.LastName,
-                newPerson.BirthDate));
+            try
+            {
+                // Calculating and setting new personId id required for FileDatasourse
+                // MySqlDatasourse returns last added to database ID
+                BirthdayPerson newPerson = new(++lastPersonId, firstName, lastName, birthDate, role);
+                var newId = datasource.AddNewBirthday(newPerson);
+                newPerson.Id = newId;
+
+                BirthdayPersons.Add(newPerson);
+            }
+            catch (InvalidOperationException e) 
+            {
+                throw new InvalidOperationException("Could not add record: " + e.Message);
+            }
         }
         else
         {
-            throw new InvalidOperationException($"Record{newPerson.Id}: Could not store persistently - datasource is not available.");
+            throw new InvalidOperationException($"Record{lastPersonId}: Could not store persistently - datasource is not available.");
         }
     }
 
@@ -80,42 +86,11 @@ public class CongratulatorModel
 
         if (datasource != null)
         {
-            datasource.ReplaceBirthday(new RawBirthday(
-                editedBirthdayPerson.Id,
-                editedBirthdayPerson.RoleString,
-                editedBirthdayPerson.FirstName,
-                editedBirthdayPerson.LastName,
-                editedBirthdayPerson.BirthDate
-            ));
+            datasource.ReplaceBirthday(editedBirthdayPerson);
         }
-        else 
+        else
         {
             throw new InvalidOperationException($"Record{editedBirthdayPerson.Id}: Could store edited record - datasource is not available.");
         }
-    }
-
-    private static List<BirthdayPerson> ConvertFromRawBirthdays(List<RawBirthday> rawBirthdays)
-    {
-        List<BirthdayPerson> birthdayPersons = [];
-        foreach (RawBirthday rawBirthday in rawBirthdays)
-        {
-            if (
-                Enum.TryParse(rawBirthday.RoleString, true, out PersonRole role) &&
-                DateOnly.TryParse(rawBirthday.BirthDateString, out DateOnly birthDate))
-            {
-                birthdayPersons.Add(new(
-                    rawBirthday.Id,
-                    rawBirthday.FirstName,
-                    rawBirthday.LastName,
-                    birthDate,
-                    role)
-                );
-            }
-            else
-            {
-                throw new InvalidOperationException($"Record{rawBirthday.Id}: Could not parse role or date");
-            }
-        }
-        return birthdayPersons;
     }
 }

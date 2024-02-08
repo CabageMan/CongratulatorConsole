@@ -253,7 +253,7 @@ public class MenuController(
         Console.Clear();
     }
 
-    private void GetDeleteBirthdayUserInput(IEnumerable<int> birthdaysIdsList)
+    private void GetDeleteBirthdayUserInput(IEnumerable<long> birthdaysIdsList)
     {
         Console.ForegroundColor = TITLE_COLOR;
         while (true)

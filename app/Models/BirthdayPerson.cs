@@ -9,21 +9,22 @@ public enum PersonRole
 }
 
 public struct BirthdayPerson(
-    int id,
+    long id,
     string firstName,
     string lastName,
     DateOnly birthDate,
     PersonRole role)
 {
-    private readonly int _id = id;
+    private long _id = id;
     private DateOnly _birthDate = birthDate;
     private String _firstName = firstName;
     private String _lastName = lastName;
     private PersonRole _role = role;
 
-    public readonly int Id
+    public long Id
     {
         get => _id;
+        set => _id = value;
     }
     public DateOnly BirthDate
     {
