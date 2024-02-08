@@ -19,6 +19,7 @@ public class MySqlDBConnection
 
     public MySqlDBConnection()
     {
+        // Find a way to use UserSecrets
         IConfigurationRoot config = new ConfigurationBuilder()
             .AddJsonFile("appSettings.json")
             .AddUserSecrets<MySqlDBConnection>()

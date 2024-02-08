@@ -1,24 +1,88 @@
+using Datasource;
 using Models;
 using NUnit.Framework;
+using NUnit.Framework.Constraints;
 
 namespace CongratulatorConsole.Tests;
 
 [TestFixture]
 public class CongratulatorModelTests
 {
-    private CongratulatorModel _congratulatorModel; 
+    private CongratulatorModel _congratulatorModel;
 
     [SetUp]
     public void Setup()
     {
-        List<String> messages = [];
-        _congratulatorModel = new CongratulatorModel(message => messages.Add(message));
+        _congratulatorModel = new CongratulatorModel(DatasourceType.FileDatasource, message => { });
     }
 
     [Test]
-    public void Should_Add_New_Birthday()
+    public void ShouldAddAndDeleteBirthdayToFileDatasource()
     {
-        Assert.That(2+2, Is.EqualTo(4));
-        // Assert.Fail("Just fail this");
+        _= DateOnly.TryParse("01.01.1001", out DateOnly testDate);
+        long lastPersonId = _congratulatorModel.BirthdayPersons.Count == 0 ? 0 : _congratulatorModel.BirthdayPersons.Last().Id;
+        long testID = lastPersonId + 1;
+        BirthdayPerson testPerson = new(
+            testID,
+            "Test",
+            "Tester",
+            testDate,
+            PersonRole.Friend);
+
+        _congratulatorModel.AddNewBirthday(
+            PersonRole.Friend,
+            "Test",
+            "Tester",
+            testDate
+        );
+
+        Assert.That(_congratulatorModel.BirthdayPersons.Contains(testPerson), Is.EqualTo(true));
+
+        _congratulatorModel.DeleteBirthdayBy(testID);
+
+        Assert.That(_congratulatorModel.BirthdayPersons.Contains(testPerson), Is.EqualTo(false));
+    }
+
+    [Test]
+    public void ShouldEditBirthdayInFileDatasource()
+    {
+        _= DateOnly.TryParse("01.01.1001", out DateOnly testDate);
+        long lastPersonId = _congratulatorModel.BirthdayPersons.Count == 0 ? 0 : _congratulatorModel.BirthdayPersons.Last().Id;
+        long testID = lastPersonId + 1;
+        BirthdayPerson testPerson = new(
+            testID,
+            "Test",
+            "Tester",
+            testDate,
+            PersonRole.Friend);
+
+        BirthdayPerson testEditedPerson = new(
+            testID,
+            "Edited",
+            "Editor",
+            testDate,
+            PersonRole.Friend);
+
+        _congratulatorModel.AddNewBirthday(
+            PersonRole.Friend,
+            "Test",
+            "Tester",
+            testDate
+        );
+        Assert.That(_congratulatorModel.BirthdayPersons.Contains(testPerson), Is.EqualTo(true));
+
+        _congratulatorModel.EditBirthday(testEditedPerson);
+        Assert.Multiple(() =>
+        {
+            Assert.That(_congratulatorModel.BirthdayPersons.Contains(testEditedPerson), Is.EqualTo(true));
+            Assert.That(_congratulatorModel.BirthdayPersons.Contains(testPerson), Is.EqualTo(false));
+        });
+
+        _congratulatorModel.DeleteBirthdayBy(testID);
+        Assert.Multiple(() =>
+        {
+            Assert.That(_congratulatorModel.BirthdayPersons.Contains(testPerson), Is.EqualTo(false));
+            Assert.That(_congratulatorModel.BirthdayPersons.Contains(testEditedPerson), Is.EqualTo(false));
+        });
     }
 }

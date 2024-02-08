@@ -11,7 +11,7 @@
 - In case using database datasource the local MySQL server is needed. Connection to database is implemented in app/Services/MySQLConnection.cs.
 
 The database is accessed with **appSettings.json** file in the **app/** directory, which is not tracked by Git (it is not a good solution, but I have some difficulties with setting UserSecrets). 
-Please create and put the **appSettings.json** file in to the **app/** directory. The structure of a file:
+Please create and put the **appSettings.json** file in to the **app/** directory. The structure of the appSettings.json file:
 ```
 {
   "CongratulatorDatabase": {

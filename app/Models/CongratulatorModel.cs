@@ -64,7 +64,7 @@ public class CongratulatorModel
         }
     }
 
-    public void DeleteBirthdayBy(int birthdayId)
+    public void DeleteBirthdayBy(long birthdayId)
     {
         if (datasource != null)
         {
@@ -107,4 +107,4 @@ public class CongratulatorModel
         }
 
     }
-}
+}    
