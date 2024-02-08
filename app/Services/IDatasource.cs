@@ -7,22 +7,26 @@ public struct RawBirthday(
     string role,
     string firstName,
     string lastName,
-    string birthDate)
+    DateOnly birthDate)
 {
     private readonly int _id = id;
     private string _role = role;
     private string _firstName = firstName;
     private string _lastName = lastName;
-    private string _birthDate = birthDate;
+    private DateOnly _birthDate = birthDate;
 
     public readonly int Id 
     {
         get => _id;
     }
-    public string BirthDateString 
+    public DateOnly BirthDate 
     { 
         get => _birthDate; 
         set => _birthDate = value; 
+    }
+    public readonly string BirthDateString 
+    { 
+        get => $"{_birthDate:MM-dd-yyyy}";
     }
     public string FirstName 
     { 

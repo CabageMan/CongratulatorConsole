@@ -21,7 +21,7 @@ public class FileDatasource : IDatasource
 
     public FileDatasource()
     {
-        try 
+        try
         {
             document = XDocument.Load(FILE_PATH);
         }
@@ -68,33 +68,35 @@ public class FileDatasource : IDatasource
         {
             var birthdayToDelete = document.Root
                 .Descendants(BIRTHDAY_RECORD_NODE_NAME)
-                .First(record => {
+                .First(record =>
+                {
                     var idNode = record.Element(ID_NODE_NAME);
                     return idNode != null ? int.Parse(idNode.Value) == birthdayId : false;
                 });
             birthdayToDelete.Remove();
             document.Save(FILE_PATH);
         }
-        else 
+        else
         {
             throw new InvalidOperationException("Root Element is null");
         }
     }
 
-    void IDatasource.ReplaceBirthday(Datasource.RawBirthday rawBirthday)
+    void IDatasource.ReplaceBirthday(RawBirthday rawBirthday)
     {
         if (document.Root != null)
         {
             var birthdayToDelete = document.Root
                 .Descendants(BIRTHDAY_RECORD_NODE_NAME)
-                .First(record => {
+                .First(record =>
+                {
                     var idNode = record.Element(ID_NODE_NAME);
                     return idNode != null ? int.Parse(idNode.Value) == rawBirthday.Id : false;
                 });
             birthdayToDelete.ReplaceWith(ConvertToXmlBirthdayRecord(rawBirthday));
             document.Save(FILE_PATH);
         }
-        else 
+        else
         {
             throw new InvalidOperationException("Root Element is null");
         }
@@ -147,24 +149,21 @@ public class FileDatasource : IDatasource
             throw new InvalidOperationException($"{LASTNAME_NODE_NAME} node is null");
         }
 
-        string birthDateStrirng;
         var birthDateNode = record.Element(BIRTHDATE_NODE_NAME);
-        if (birthDateNode != null)
+        if (birthDateNode != null && DateOnly.TryParse(birthDateNode.Value, out DateOnly birthDate))
         {
-            birthDateStrirng = birthDateNode.Value;
+            return new RawBirthday(
+                id,
+                roleStrirng,
+                firstName,
+                lastName,
+                birthDate
+            );
         }
         else
         {
             throw new InvalidOperationException($"{BIRTHDATE_NODE_NAME} node is null");
         }
-
-        return new RawBirthday(
-            id,
-            roleStrirng,
-            firstName,
-            lastName,
-            birthDateStrirng
-        );
     }
 
     private static XElement ConvertToXmlBirthdayRecord(RawBirthday rawBirthday)

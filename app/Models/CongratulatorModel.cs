@@ -42,7 +42,7 @@ public class CongratulatorModel
                 newPerson.RoleString,
                 newPerson.FirstName,
                 newPerson.LastName,
-                newPerson.BirthDateString));
+                newPerson.BirthDate));
         }
         else
         {
@@ -85,7 +85,7 @@ public class CongratulatorModel
                 editedBirthdayPerson.RoleString,
                 editedBirthdayPerson.FirstName,
                 editedBirthdayPerson.LastName,
-                editedBirthdayPerson.BirthDateString
+                editedBirthdayPerson.BirthDate
             ));
         }
         else 

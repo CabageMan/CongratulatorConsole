@@ -13,6 +13,8 @@ public class MySqlDBConnection
     private const string DB_NAME = "congratulator_birthdays";
     private readonly string? dbUserName;
     private readonly string? dbPassword;
+    
+
     public MySqlConnection? Connection { get; private set; }
 
     public MySqlDBConnection()
