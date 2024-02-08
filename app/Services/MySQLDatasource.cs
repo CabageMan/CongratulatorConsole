@@ -37,7 +37,7 @@ public class MySQLDatasource : IDatasource
                 var command = new MySqlCommand
                 {
                     Connection = connection,
-                    CommandText = @"SELECT * FROM Birthday"
+                    CommandText = "SELECT * FROM " + BIRTHDAY_TABLE_NAME
                 };
 
                 var reader = command.ExecuteReader();
@@ -70,68 +70,70 @@ public class MySQLDatasource : IDatasource
 
     long IDatasource.AddNewBirthday(BirthdayPerson birthday)
     {
-        try
+        string query = "INSERT INTO " + BIRTHDAY_TABLE_NAME + " (" +
+            ROLE_COLUMN_NAME + ", " + FIRST_NAME_COLUMN_NAME + ", " +
+            LAST_NAME_COLUMN_NAME + ", " + BIRTH_DATE_COLUMN_NAME + ") " +
+            "VALUES (@RoleValue, @FirstNameValue, @LastNameValue, @BirthDateValue)";
+        long lastInsertedId = 0;
+        ExecuteCommand(cmd =>
         {
-            MySqlDBConnection.Instance().Open();
-            if (MySqlDBConnection.Instance().IsOpened)
-            {
-                string query = "INSERT INTO " + BIRTHDAY_TABLE_NAME + " (" + 
-                    ROLE_COLUMN_NAME + ", " + FIRST_NAME_COLUMN_NAME + ", " +
-                    LAST_NAME_COLUMN_NAME + ", " + BIRTH_DATE_COLUMN_NAME + ") " +
-                    "VALUES (@RoleValue, @FirstNameValue, @LastNameValue, @BirthDateValue)";
-                var cmd = new MySqlCommand();
-                cmd.CommandText = query;
-                cmd.Parameters.AddWithValue("@RoleValue", birthday.RoleString);
-                cmd.Parameters.AddWithValue("@FirstNameValue", birthday.FirstName);
-                cmd.Parameters.AddWithValue("@LastNameValue", birthday.LastName);
-                cmd.Parameters.AddWithValue("@BirthDateValue", birthday.BirthDate.ToString("yyyy-MM-dd"));
-                cmd.Parameters.AddWithValue("@IdValue", birthday.Id);
-                cmd.Connection = MySqlDBConnection.Instance().Connection;
-                cmd.ExecuteNonQuery();
-                long id = cmd.LastInsertedId;
-                MySqlDBConnection.Instance().Close();
-                return id;
-            }
-            else {
-                throw new InvalidOperationException("Could not open connection");
-            }
-        }
-        catch (InvalidOperationException e)
-        {
-            throw new InvalidOperationException(e.Message);
-        }
-        catch (MySqlException e)
-        {
-            throw new InvalidOperationException(e.Message);
-        }
+            cmd.CommandText = query;
+            cmd.Parameters.AddWithValue("@RoleValue", birthday.RoleString);
+            cmd.Parameters.AddWithValue("@FirstNameValue", birthday.FirstName);
+            cmd.Parameters.AddWithValue("@LastNameValue", birthday.LastName);
+            cmd.Parameters.AddWithValue("@BirthDateValue", birthday.BirthDate.ToString("yyyy-MM-dd"));
+            cmd.Parameters.AddWithValue("@IdValue", birthday.Id);
+        }, id => lastInsertedId = id);
+
+        return lastInsertedId;
     }
 
     void IDatasource.DeleteBirthdayBy(long birthdayId)
     {
 
+        string query = "DELETE FROM " + BIRTHDAY_TABLE_NAME + " WHERE " +
+            ID_COLUMN_NAME + "=@IdValue";
+        ExecuteCommand(cmd =>
+        {
+            cmd.CommandText = query;
+            cmd.Parameters.AddWithValue("@IdValue", birthdayId);
+        }, id => {});
     }
 
-    void IDatasource.ReplaceBirthday(BirthdayPerson rawBirthday)
+    void IDatasource.ReplaceBirthday(BirthdayPerson birthday)
+    {
+        string query = "UPDATE " + BIRTHDAY_TABLE_NAME + " SET " + ROLE_COLUMN_NAME +
+            "=@RoleValue, " + FIRST_NAME_COLUMN_NAME + "=@FirstNameValue, " +
+            LAST_NAME_COLUMN_NAME + "=@LastNameValue, " + BIRTH_DATE_COLUMN_NAME +
+            "=@BirthDateValue WHERE " + ID_COLUMN_NAME + "=@IdValue";
+        ExecuteCommand(cmd =>
+        {
+            cmd.CommandText = query;
+            cmd.Parameters.AddWithValue("@RoleValue", birthday.RoleString);
+            cmd.Parameters.AddWithValue("@FirstNameValue", birthday.FirstName);
+            cmd.Parameters.AddWithValue("@LastNameValue", birthday.LastName);
+            cmd.Parameters.AddWithValue("@BirthDateValue", birthday.BirthDate.ToString("yyyy-MM-dd"));
+            cmd.Parameters.AddWithValue("@IdValue", birthday.Id);
+        }, id => {});
+    }
+
+    private static void ExecuteCommand(Action<MySqlCommand> comandAction, Action<long> returnID)
     {
         try
         {
             MySqlDBConnection.Instance().Open();
             if (MySqlDBConnection.Instance().IsOpened)
             {
-                string query = "UPDATE " + BIRTHDAY_TABLE_NAME + " SET " + ROLE_COLUMN_NAME +
-                    "=@RoleValue, " + FIRST_NAME_COLUMN_NAME + "=@FirstNameValue, " +
-                    LAST_NAME_COLUMN_NAME + "=@LastNameValue, " + BIRTH_DATE_COLUMN_NAME +
-                    "=@BirthDateValue WHERE " + ID_COLUMN_NAME + "=@IdValue";
                 var cmd = new MySqlCommand();
-                cmd.CommandText = query;
-                cmd.Parameters.AddWithValue("@RoleValue", rawBirthday.RoleString);
-                cmd.Parameters.AddWithValue("@FirstNameValue", rawBirthday.FirstName);
-                cmd.Parameters.AddWithValue("@LastNameValue", rawBirthday.LastName);
-                cmd.Parameters.AddWithValue("@BirthDateValue", rawBirthday.BirthDate.ToString("yyyy-MM-dd"));
-                cmd.Parameters.AddWithValue("@IdValue", rawBirthday.Id);
+                comandAction(cmd);
                 cmd.Connection = MySqlDBConnection.Instance().Connection;
                 cmd.ExecuteNonQuery();
+                returnID(cmd.LastInsertedId);
                 MySqlDBConnection.Instance().Close();
+            }
+            else
+            {
+                throw new InvalidOperationException("Could not open connection");
             }
         }
         catch (InvalidOperationException e)

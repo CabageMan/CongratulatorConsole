@@ -45,7 +45,7 @@ public class CongratulatorModel
 
                 BirthdayPersons.Add(newPerson);
             }
-            catch (InvalidOperationException e) 
+            catch (InvalidOperationException e)
             {
                 throw new InvalidOperationException("Could not add record: " + e.Message);
             }
@@ -58,11 +58,17 @@ public class CongratulatorModel
 
     public void DeleteBirthdayBy(int birthdayId)
     {
-        BirthdayPersons.RemoveAll(person => person.Id == birthdayId);
-
         if (datasource != null)
         {
-            datasource.DeleteBirthdayBy(birthdayId);
+            try
+            {
+                datasource.DeleteBirthdayBy(birthdayId);
+                BirthdayPersons.RemoveAll(person => person.Id == birthdayId);
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new InvalidOperationException($"Could not delete record with ID={birthdayId}: " + e.Message);
+            }
         }
         else
         {
@@ -75,22 +81,22 @@ public class CongratulatorModel
         int editedPersonIndex = BirthdayPersons
             .FindIndex(person => person.Id == editedBirthdayPerson.Id);
 
-        if (BirthdayPersons.Count > editedPersonIndex)
+        if (BirthdayPersons.Count > editedPersonIndex && datasource != null)
         {
-            BirthdayPersons[editedPersonIndex] = editedBirthdayPerson;
+            try
+            {
+                datasource.ReplaceBirthday(editedBirthdayPerson);
+                BirthdayPersons[editedPersonIndex] = editedBirthdayPerson;
+            }
+            catch (InvalidOperationException e)
+            {
+                throw new InvalidOperationException($"Could store edited record: " + e.Message);
+            }
         }
         else
         {
-            throw new InvalidOperationException($"Record{editedBirthdayPerson.Id}: Could not find a record to edit");
+            throw new InvalidOperationException($"Could not edit record with ID={editedBirthdayPerson.Id}");
         }
 
-        if (datasource != null)
-        {
-            datasource.ReplaceBirthday(editedBirthdayPerson);
-        }
-        else
-        {
-            throw new InvalidOperationException($"Record{editedBirthdayPerson.Id}: Could store edited record - datasource is not available.");
-        }
     }
 }

@@ -8,7 +8,6 @@ namespace Datasource;
 
 public class FileDatasource : IDatasource
 {
-    // TODO: Move file path to config file and environment variable
     private const string FILE_PATH = "Resources/Birthdays.xml";
     private const string BIRTHDAY_RECORD_NODE_NAME = "BirthdayRecord";
     private const string ID_NODE_NAME = "Id";
