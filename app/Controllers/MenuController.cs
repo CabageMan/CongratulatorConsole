@@ -61,7 +61,7 @@ public class MenuController(
         Console.Clear();
         while (!datasourceSelected)
         {
-            ShowMenuTitle("Welcome to the Congratulator!\nPlease select the data sourse you would like:");
+            ShowMenuTitle("Welcome to the Congratulator!\nPlease select the DataSource you would like:");
             ShowMenuItems<DatasourceType>();
             HandleSelectingDatasource(GetUsersMenuItemInput<DatasourceType>());
         }

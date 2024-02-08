@@ -15,6 +15,8 @@ public class CongratulatorModelTests
     {
         _congratulatorModel = new CongratulatorModel(DatasourceType.FileDatasource, message => { });
     }
+    // TODO:
+    // Need to use test environment for tests (test Xml file and test database)!
 
     [Test]
     public void ShouldAddAndDeleteBirthdayToFileDatasource()
