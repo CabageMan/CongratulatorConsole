@@ -10,3 +10,8 @@ public interface IDatasource
     void ReplaceBirthday(BirthdayPerson brthday);
 }
 
+public enum DatasourceType
+{
+    FileDatasource = 1,
+    DataBase
+}

@@ -1,6 +1,4 @@
-using System.Runtime.Serialization;
 using Datasource;
-using Org.BouncyCastle.Asn1.Misc;
 
 namespace Models;
 
@@ -10,12 +8,22 @@ public class CongratulatorModel
 
     public List<BirthdayPerson> BirthdayPersons { get; set; }
 
-    public CongratulatorModel(Action<string> callback)
+    public CongratulatorModel(DatasourceType datasourceType, Action<string> callback)
     {
         try
         {
-            // datasource = new FileDatasource();
-            datasource = new MySQLDatasource();
+            switch (datasourceType)
+            {
+                case DatasourceType.FileDatasource:
+                    datasource = new FileDatasource();
+                    break;
+                case DatasourceType.DataBase:
+                    datasource = new MySQLDatasource();
+                    break;
+                default:
+                    datasource = new FileDatasource();
+                    break;
+            }
             BirthdayPersons = datasource.GetAllBirthdays();
         }
         catch (InvalidOperationException e)

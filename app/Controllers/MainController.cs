@@ -1,3 +1,4 @@
+using Datasource;
 using Models;
 
 namespace Controllers;
@@ -9,7 +10,9 @@ public class MainController
 
     public MainController()
     {
+        DatasourceType selectedDatasource = DatasourceType.FileDatasource; // Default value
         menuController = new MenuController(
+            datasource => selectedDatasource = datasource,
             ShowAllBirthdays,
             ShowUpcommingBitrhdays,
             AddNewBirthday,
@@ -17,8 +20,9 @@ public class MainController
             DeleteBirthday,
             ShowBirthdaysToEdit,
             EditBirthday);
+        menuController.SelectDatasource();
 
-        congratulatorModel = new CongratulatorModel(message => menuController.Warnings.Add(message));
+        congratulatorModel = new CongratulatorModel(selectedDatasource, message => menuController.Warnings.Add(message));
     }
 
     public void Start()

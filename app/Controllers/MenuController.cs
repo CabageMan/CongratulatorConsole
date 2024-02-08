@@ -1,12 +1,10 @@
-using Microsoft.VisualBasic;
+using Datasource;
 using Models;
-using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
-using System.Data.Common;
 
 namespace Controllers;
 
 public class MenuController(
+    Action<DatasourceType> selectDatasource,
     Action showBirthdays,
     Action showUpcommingBirthdays,
     Action<string, string, PersonRole, DateOnly> addNewBirthday,
@@ -39,7 +37,9 @@ public class MenuController(
     }
 
     private bool exitApp = false;
+    private bool datasourceSelected = false;
 
+    private readonly Action<DatasourceType> _selectDatasource = selectDatasource;
     private readonly Action _showBirthdays = showBirthdays;
     private readonly Action _showUpcommingBirthdays = showUpcommingBirthdays;
     private readonly Action<string, string, PersonRole, DateOnly> _addNewBirthday = addNewBirthday;
@@ -54,6 +54,17 @@ public class MenuController(
     {
         get => _warnings;
         set => _warnings = value;
+    }
+
+    public void SelectDatasource()
+    {
+        Console.Clear();
+        while (!datasourceSelected)
+        {
+            ShowMenuTitle("Welcome to the Congratulator!\nPlease select the data sourse you would like:");
+            ShowMenuItems<DatasourceType>();
+            HandleSelectingDatasource(GetUsersMenuItemInput<DatasourceType>());
+        }
     }
 
     public void Start()
@@ -334,6 +345,11 @@ public class MenuController(
     }
 
     // Handle User Input
+    private void HandleSelectingDatasource(DatasourceType datasourceType)
+    {
+        _selectDatasource(datasourceType);
+        datasourceSelected = true;
+    }
     private void HandleSelectedMainMenuItem(MainMenuItem item)
     {
         Console.Clear();
